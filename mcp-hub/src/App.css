@@ -1,0 +1,14 @@
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.read-the-docs {
+  color: #888;
+  font-size: 0.875rem;
+}
