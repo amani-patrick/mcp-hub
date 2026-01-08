@@ -44,36 +44,68 @@ console.log(result.citations);`,
       { step: "4", title: "Answer", desc: "Get answers with exact source citations" },
     ],
   },
-  "api-validator": {
+  "api-contract-validator": {
     title: "API Contract Validator MCP",
-    subtitle: "Catch API breaking changes before they break your app",
-    installation: `# Install the MCP server
-npm install @mcp/api-validator
+    subtitle: "Enterprise-grade API validation with enhanced security, performance, and breaking change analysis",
+    installation: `# Install MCP server
+npm install @mcp/api-contract-validator
 
-# Or using pip
-pip install mcp-api-validator`,
-    usage: `// Initialize with your OpenAPI spec
-const validator = new APIValidator({
-  specPath: "./openapi.yaml",
-});
+# Or clone from source
+git clone https://github.com/amani-patrick/mcp-hub.git
+cd mcp-hub/API_ContractValidator
+npm install
+npm run build
 
-// Validate an actual API response
-const result = await validator.validate({
-  endpoint: "/api/users",
-  method: "GET",
-  response: actualResponse,
-});
-
-// Check for issues
-if (result.hasBreakingChanges) {
-  console.error(result.mismatches);
-  console.error(result.missingFields);
+# Configure in Windsurf
+{
+  "mcpServers": {
+    "api-contract-validator": {
+      "command": "node",
+      "args": ["path/to/API_ContractValidator/dist/index.js"],
+      "env": {}
+    }
+  }
 }`,
+    usage: `// Basic validation
+const result = await validate_response({
+  schema: {
+    type: "object",
+    properties: {
+      id: { type: "integer" },
+      name: { type: "string" }
+    }
+  },
+  response: { id: 1, name: "John" }
+});
+
+// Enhanced validation with security & performance
+const enhanced = await enhanced_validate_response({
+  schema: openApiSpec,
+  response: actualResponse,
+  options: {
+    includeSecurity: true,
+    includePerformance: true,
+    customRules: ["naming-conventions", "response-time"]
+  }
+});
+
+// Breaking changes analysis
+const changes = await enhanced_breaking_changes({
+  oldSpec: openApiV1,
+  newSpec: openApiV2,
+  options: {
+    includeClientImpact: true,
+    includeMigrationSuggestions: true,
+    includeVisualDiff: true
+  }
+});`,
     workflow: [
-      { step: "1", title: "Load Spec", desc: "Parse your OpenAPI specification file" },
-      { step: "2", title: "Capture", desc: "Record actual API responses during runtime" },
-      { step: "3", title: "Compare", desc: "Detect schema mismatches and missing fields" },
-      { step: "4", title: "Report", desc: "Get detailed reports of breaking changes" },
+      { step: "1", title: "Load Specs", desc: "Parse OpenAPI 3.0+ specifications" },
+      { step: "2", title: "Capture", desc: "Record actual API responses from your application" },
+      { step: "3", title: "Validate", desc: "Compare responses against schemas with AI-powered analysis" },
+      { step: "4", title: "Security Scan", desc: "Detect SQL injection, XSS, and authentication issues" },
+      { step: "5", title: "Performance", desc: "Analyze response complexity and performance metrics" },
+      { step: "6", title: "Report", desc: "Get detailed reports with migration suggestions" },
     ],
   },
 };

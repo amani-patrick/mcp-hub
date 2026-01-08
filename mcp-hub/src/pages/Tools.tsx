@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MCPCard from "@/components/MCPCard";
-import { FileText, Shield } from "lucide-react";
+import { FileText, Shield, Zap, Code, AlertTriangle, TrendingUp } from "lucide-react";
 
 const mcpTools = [
   {
@@ -22,17 +22,21 @@ const mcpTools = [
     ],
   },
   {
-    id: "api-validator",
+    id: "api-contract-validator",
     title: "API Contract Validator MCP",
     description:
-      "Ensure your frontend and backend APIs stay in sync. Validates actual API responses against OpenAPI specs to catch breaking changes before they reach production.",
+      "Enterprise-grade API validation with enhanced security scanning, performance analysis, and breaking change detection. Ensures your frontend and backend APIs stay in sync.",
     icon: <Shield className="w-6 h-6" />,
-    badge: "Dev-focused",
+    badge: "🏆 Featured",
     features: [
       "OpenAPI spec validation",
-      "Schema mismatch detection",
-      "Missing field identification",
-      "Breaking change alerts",
+      "Enhanced security scanning",
+      "Performance analysis",
+      "Custom validation rules",
+      "Breaking change detection",
+      "Client impact analysis",
+      "Migration suggestions",
+      "Visual diff comparisons",
       "CI/CD integration ready",
     ],
   },

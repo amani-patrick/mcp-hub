@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import MCPCard from "./MCPCard";
+import { Github } from "lucide-react";
 
 const mcpTools = [
   {
@@ -15,15 +16,19 @@ const mcpTools = [
     ],
   },
   {
-    id: "api-validator",
+    id: "api-contract-validator",
     title: "API Contract Validator",
     description:
-      "Continuously compare real responses with OpenAPI specs to detect breaking changes early.",
+      "Enterprise-grade API validation with enhanced security scanning, performance analysis, and breaking change detection.",
     icon: null,
     features: [
-      "Schema mismatch detection",
-      "Missing and extra field checks",
-      "CI/CD-friendly JSON output",
+      "OpenAPI spec validation",
+      "Enhanced security scanning",
+      "Performance analysis",
+      "Breaking change detection",
+      "Client impact analysis",
+      "Migration suggestions",
+      "Visual diff comparisons",
     ],
   },
 ];
@@ -42,6 +47,15 @@ const ToolsSection = () => {
               and documentation tailored for AI agent integration.
             </p>
           </div>
+          <a
+            href="https://github.com/amani-patrick/mcp-hub"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Github className="w-4 h-4" />
+            View on GitHub
+          </a>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
