@@ -38,7 +38,7 @@ Before you start contributing, make sure you have:
    ```
 
 5. **Verify Setup**
-   - Open [http://localhost:5173](http://localhost:5173)
+   - Open [http://localhost:8080](http://localhost:8080)
    - Ensure the application loads without errors
 
 ## 📋 How to Contribute
