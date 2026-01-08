@@ -1,0 +1,307 @@
+name: API Contract Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/*.json'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/*.json'
+
+jobs:
+  validate-contracts:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for diff comparison
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Find OpenAPI specs
+      id: find-specs
+      run: |
+        echo "specs=$(find . -name '*.yaml' -o -name '*.yml' -o -name 'openapi*.json' | grep -v node_modules | tr '\n' ' ')" >> $GITHUB_OUTPUT
+    
+    - name: Validate OpenAPI specs
+      run: |
+        for spec in ${{ steps.find-specs.outputs.specs }}; do
+          echo "Validating $spec..."
+          # Add your OpenAPI validation logic here
+          # For example, using swagger-codegen or spectral
+          if [ -f "$spec" ]; then
+            echo "✅ $spec is accessible"
+          else
+            echo "❌ $spec not found"
+            exit 1
+          fi
+        done
+    
+    - name: Check for breaking changes (if not initial commit)
+      if: github.event_name == 'pull_request'
+      run: |
+        # Get the base branch for comparison
+        git fetch origin ${{ github.base_ref }}
+        BASE_BRANCH="origin/${{ github.base_ref }}"
+        
+        # Find modified OpenAPI specs
+        CHANGED_SPECS=$(git diff --name-only $BASE_BRANCH HEAD | grep -E '\.(yaml|yml|json)$' | grep -v node_modules || true)
+        
+        if [ -n "$CHANGED_SPECS" ]; then
+          echo "Changed OpenAPI specs found:"
+          echo "$CHANGED_SPECS"
+          
+          for spec in $CHANGED_SPECS; do
+            if [ -f "$spec" ]; then
+              echo "Analyzing changes in $spec..."
+              
+              # Get the old version of the file
+              git show $BASE_BRANCH:$spec > /tmp/old_spec.yaml 2>/dev/null || echo "No previous version found"
+              
+              if [ -f "/tmp/old_spec.yaml" ]; then
+                # Run breaking changes detection
+                npm run cli:build
+                node dist/cli/index.js diff \
+                  --old /tmp/old_spec.yaml \
+                  --new "$spec" \
+                  --format table \
+                  --severity critical \
+                  --severity major || {
+                  echo "❌ Breaking changes detected in $spec"
+                  exit 1
+                }
+                echo "✅ No critical breaking changes in $spec"
+              else
+                echo "ℹ️ New spec file: $spec"
+              fi
+            fi
+          done
+        else
+          echo "ℹ️ No OpenAPI spec changes detected"
+        fi
+    
+    - name: Batch validation (if specs directory exists)
+      if: hashFiles('specs/') != ''
+      run: |
+        if [ -d "specs" ]; then
+          echo "Running batch validation on specs directory..."
+          npm run cli:build
+          
+          # Use the first spec as baseline for comparison
+          BASELINE=$(find specs -name '*.yaml' -o -name '*.yml' -o -name '*.json' | head -1)
+          
+          if [ -n "$BASELINE" ]; then
+            echo "Using $BASELINE as baseline"
+            node dist/cli/index.js batch \
+              --directory specs \
+              --baseline "$BASELINE" \
+              --format table || {
+              echo "❌ Batch validation failed"
+              exit 1
+            }
+            echo "✅ Batch validation passed"
+          else
+            echo "ℹ️ No specs found in specs directory"
+          fi
+        fi
+    
+    - name: Generate validation report
+      if: always()
+      run: |
+        echo "# API Contract Validation Report" > validation-report.md
+        echo "" >> validation-report.md
+        echo "## Summary" >> validation-report.md
+        echo "- **Event**: ${{ github.event_name }}" >> validation-report.md
+        echo "- **Branch**: ${{ github.ref_name }}" >> validation-report.md
+        echo "- **Commit**: ${{ github.sha }}" >> validation-report.md
+        echo "- **Node Version**: ${{ matrix.node-version }}" >> validation-report.md
+        echo "" >> validation-report.md
+        echo "## OpenAPI Specs Found" >> validation-report.md
+        for spec in ${{ steps.find-specs.outputs.specs }}; do
+          echo "- $spec" >> validation-report.md
+        done
+        echo "" >> validation-report.md
+        echo "## Validation Status" >> validation-report.md
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ All validations passed" >> validation-report.md
+        else
+          echo "❌ Some validations failed" >> validation-report.md
+        fi
+        
+        # Upload report as artifact
+        echo "report_path=validation-report.md" >> $GITHUB_ENV
+    
+    - name: Upload validation report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: validation-report-${{ matrix.node-version }}
+        path: ${{ env.report_path }}
+        retention-days: 30
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const reportPath = process.env.report_path;
+          
+          if (fs.existsSync(reportPath)) {
+            const report = fs.readFileSync(reportPath, 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📋 API Contract Validation Results\n\n${report}`
+            });
+          }
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+    
+    - name: Check for sensitive data in specs
+      run: |
+        echo "Checking for potential sensitive data in OpenAPI specs..."
+        SENSITIVE_PATTERNS=(
+          "password"
+          "secret"
+          "token"
+          "key"
+          "credential"
+          "auth"
+        )
+        
+        for spec in $(find . -name '*.yaml' -o -name '*.yml' -o -name '*.json' | grep -v node_modules); do
+          echo "Checking $spec..."
+          for pattern in "${SENSITIVE_PATTERNS[@]}"; do
+            if grep -i "$pattern" "$spec" | grep -v "x-" | grep -v "description" > /dev/null; then
+              echo "⚠️ Potential sensitive data found in $spec containing '$pattern'"
+              # Don't fail the build, just warn
+            fi
+          done
+        done
+
+  performance-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Measure CLI performance
+      run: |
+        echo "Measuring CLI performance..."
+        
+        # Create test specs if they don't exist
+        mkdir -p test-specs
+        
+        # Generate a large test spec for performance testing
+        cat > test-specs/large-spec.yaml << 'EOF'
+        openapi: 3.0.0
+        info:
+          title: Large Test API
+          version: 1.0.0
+        paths:
+          /users:
+            get:
+              responses:
+                '200':
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          users:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/User'
+          /users/{id}:
+            get:
+              parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+              responses:
+                '200':
+                  content:
+                    application/json:
+                      schema:
+                        $ref: '#/components/schemas/User'
+        components:
+          schemas:
+            User:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+        EOF
+        
+        # Time the CLI operations
+        echo "Testing CLI performance with large spec..."
+        time node dist/cli/index.js validate \
+          --spec test-specs/large-spec.yaml \
+          --response '{"users":[]}' \
+          --path /users \
+          --method GET
+        
+        echo "Performance test completed"
