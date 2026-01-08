@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  mcp-api-contract-validator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      # Development settings (security disabled)
+      - MCP_AUTH_ENABLED=false
+      - MCP_RATE_LIMIT_ENABLED=false
+      - NODE_ENV=development
+      - DEMO_HTTP=true
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./logs:/app/logs
+    restart: unless-stopped
+    command: ["sh", "-c", "npm install && npm run build && node dist/index.js"]

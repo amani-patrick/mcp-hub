@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mcp-api-contract-validator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # Security settings (enabled by default for production)
+      - MCP_AUTH_ENABLED=true
+      - MCP_AUTH_TYPE=api_key
+      - MCP_API_KEY=${MCP_API_KEY:-your-secret-api-key-here}
+      - MCP_JWT_SECRET=${MCP_JWT_SECRET:-your-jwt-secret-here}
+      
+      # Rate limiting settings (enabled by default for production)
+      - MCP_RATE_LIMIT_ENABLED=true
+      - MCP_RPM=${MCP_RPM:-100}
+      - MCP_BURST_LIMIT=${MCP_BURST_LIMIT:-20}
+      
+      # Server settings
+      - NODE_ENV=production
+      - DEMO_HTTP=false
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Redis for rate limiting in production
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    profiles:
+      - production
+
+volumes:
+  redis_data:
+    driver: local
