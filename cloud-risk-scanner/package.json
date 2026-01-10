@@ -1,0 +1,29 @@
+{
+  "name": "cloud-risk-scanner",
+  "version": "1.0.0",
+  "description": "Cloud Misconfig Risk Scanner",
+  "main": "dist/src/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/server.js",
+    "dev": "ts-node src/server.ts",
+    "verify": "npm run build && node dist/verify-script.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "hcl2-parser": "^1.0.0",
+    "js-yaml": "^4.1.0",
+    "markdown-table": "^2.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/markdown-table": "^2.0.0",
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
