@@ -33,24 +33,38 @@ MCP Hub is a curated collection of custom-built MCP tools and utilities designed
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/amani-patrick/mcp-hub.git
-   cd mcp-hub
-   ```
+This repository is organized as a monorepo containing the **MCP Hub** (web interface) and multiple **MCP Servers** (tools).
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+#### 1. Running the MCP Hub (Web Interface)
 
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+The Hub provides a visual interface to explore documentation for all tools.
 
-4. **Open your browser**
-   Navigate to [http://localhost:8080](http://localhost:8080)
+```bash
+cd mcp-hub
+npm install
+npm run dev
+```
+Access the Hub at [http://localhost:8080](http://localhost:8080).
+
+#### 2. Installing Specific MCP Tools
+
+Each tool is a standalone package. To use a tool, navigate to its directory and install dependencies.
+
+**Example: Installing Docker MCP**
+```bash
+cd docker-mcp
+npm install
+npm run build
+```
+
+**Example: Installing Kubernetes MCP**
+```bash
+cd kubernetes-mcp
+npm install
+npm run build
+```
+
+Refer to the `README.md` within each tool's directory for specific configuration and usage instructions.
 
 ### Available Scripts
 
@@ -64,12 +78,16 @@ MCP Hub is a curated collection of custom-built MCP tools and utilities designed
 
 ### 🛠️ Available Tools
 
-Our MCP Hub includes various tools for different purposes:
+Our MCP Hub includes a comprehensive suite of production-ready tools:
 
-- **API Contract Validator**: Validate and compare API contracts
-- **File System Tools**: Advanced file operations and management
-- **Web Automation**: Browser automation and testing capabilities
-- **Data Processing**: Tools for data transformation and analysis
+- **Kubernetes MCP**: Production-grade interface for safe, bounded Kubernetes operations.
+- **Registry MCP**: Secure governance for container registries (Docker Hub, GHCR).
+- **Cloud Containers MCP**: Abstracted management for serverless container platforms (AWS ECS).
+- **Docker MCP**: Safe, local Docker management for AI agents.
+- **API Contract Validator**: Enterprise-grade validation for OpenAPI specs and JSON responses.
+- **API Performance Monitor**: Real-time monitoring with SLA tracking and external integrations.
+- **Cloud Risk Scanner**: Static analysis for Terraform, Kubernetes, and IAM misconfigurations.
+- **Incident Timeline MCP**: Forensic log analysis and automated timeline construction.
 
 ### 📚 Learning Resources
 

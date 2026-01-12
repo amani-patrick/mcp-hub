@@ -15,31 +15,30 @@ Before you start contributing, make sure you have:
 
 ### Development Setup
 
-1. **Fork the Repository**
-   ```bash
-   # Fork the repository on GitHub first, then clone your fork
-   git clone https://github.com/YOUR_USERNAME/mcp-hub.git
-   cd mcp-hub
-   ```
+#### 1. Fork and Clone
+```bash
+git clone https://github.com/YOUR_USERNAME/mcp-hub.git
+cd mcp-hub
+```
 
-2. **Add Upstream Remote**
-   ```bash
-   git remote add upstream https://github.com/amani-patrick/mcp-hub.git
-   ```
+#### 2. Setting up the Hub (Frontend)
+To work on the `mcp-hub` web interface:
+```bash
+cd mcp-hub
+npm install
+npm run dev
+```
+Open [http://localhost:8080](http://localhost:8080) to verify.
 
-3. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-4. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Verify Setup**
-   - Open [http://localhost:8080](http://localhost:8080)
-   - Ensure the application loads without errors
+#### 3. Working on an MCP Tool
+To work on a specific tool (e.g., `docker-mcp`):
+```bash
+cd docker-mcp
+npm install
+npm run build
+# Run tests if available
+npm test
+```
 
 ## 📋 How to Contribute
 
@@ -375,14 +374,23 @@ We use these labels to categorize issues:
 4. **UI/UX**: Improve the user interface
 5. **Performance**: Optimize application performance
 
-### Tool Development
+### Adding a New Tool
+
+To add a new MCP tool to this repository:
+
+1.  **Create Directory**: Create a new directory for your tool (e.g., `my-new-tool-mcp`).
+2.  **Initialize**: Set up `package.json` and `tsconfig.json`.
+3.  **Implement**: Build your MCP server using `@modelcontextprotocol/sdk`.
+4.  **Register**: Add your tool's metadata to `mcp-hub/src/data/tools.tsx` so it appears in the frontend.
+5.  **Document**: Add a `README.md` in your tool's directory.
+
+### Tool Development Ideas
 
 We're looking for contributions in these areas:
-- File system utilities
-- Web automation tools
-- Data processing helpers
-- API integrations
-- Database connectors
+- Database connectors (PostgreSQL, Redis)
+- Cloud provider integrations (Azure, GCP)
+- Developer productivity tools
+- Security analysis tools
 
 ## 🤝 Community Guidelines
 
