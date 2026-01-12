@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+npm-debug.log*
+package-lock.json
+
+# Build outputs
+dist/
+
+# Environment files
+.env
+.env.production
+.env.local
+
+# IDE files
+.vscode
+.idea
+
+# Git files
+.git
+.gitignore
+
+# Documentation
+README.md
+docs
+
+# Tests
+test
+tests
+coverage

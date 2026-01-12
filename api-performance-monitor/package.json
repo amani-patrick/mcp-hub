@@ -1,0 +1,37 @@
+{
+  "name": "api-performance-monitor",
+  "version": "1.0.0",
+  "description": "Real-time API performance monitoring MCP tool with SLA tracking and analytics",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "dev:safe": "node start-dev.cjs",
+    "dev:cjs": "node start-dev.cjs",
+    "test": "jest",
+    "test:api": "node test-api.cjs",
+    "dev:node": "node --loader ts-node/esm src/index.ts",
+    "dev:ts": "ts-node --esm src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.25.76",
+    "express": "^4.19.2",
+    "ws": "^8.14.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "@types/ws": "^8.5.10",
+    "@types/express": "^4.17.21",
+    "typescript": "^5.8.3",
+    "ts-node": "^10.9.2",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0"
+  },
+  "keywords": ["mcp", "api", "performance", "monitoring", "sla"],
+  "author": "Amani Patrick",
+  "license": "MIT"
+}
