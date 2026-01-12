@@ -1,0 +1,31 @@
+{
+  "name": "docker-mcp",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server for safe Docker interaction",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "docker",
+    "ai",
+    "llm"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "dockerode": "^4.0.2",
+    "zod": "^3.23.8",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.12.12",
+    "@types/dockerode": "^3.3.29",
+    "@types/fs-extra": "^11.0.4"
+  }
+}
