@@ -1,0 +1,29 @@
+{
+  "name": "kubernetes-mcp",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server for safe Kubernetes interaction",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "kubernetes",
+    "k8s",
+    "ai",
+    "llm"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "@kubernetes/client-node": "^0.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.12.12"
+  }
+}
