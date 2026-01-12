@@ -70,7 +70,7 @@ const About = () => {
                     to any of our projects. We believe in transparency and community collaboration.
                   </p>
                   <a
-                    href="https://github.com/yourusername/mcp-hub"
+                    href="https://github.com/amani-patrick/mcp-hub"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground font-mono text-sm transition-colors"

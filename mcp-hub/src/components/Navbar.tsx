@@ -62,7 +62,7 @@ const Navbar = () => {
           {/* GitHub Button */}
           <div className="hidden md:flex items-center gap-4">
             <a
-              href="https://github.com/yourusername/mcp-hub"
+              href="https://github.com/amani-patrick/mcp-hub"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:border-primary/50 text-sm font-mono text-muted-foreground hover:text-primary transition-all duration-300"
@@ -107,7 +107,7 @@ const Navbar = () => {
               </Link>
             ))}
             <a
-              href="https://github.com/yourusername/mcp-hub"
+              href="https://github.com/amani-patrick/mcp-hub"
               target="_blank"
               rel="noopener noreferrer"
               className="block py-3 px-4 nav-link text-sm hover:bg-secondary/50 rounded-lg transition-colors mt-2"

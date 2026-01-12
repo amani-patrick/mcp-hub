@@ -44,7 +44,7 @@ const Footer = () => {
                 Documentation
               </Link>
               <a
-                href="https://github.com/yourusername/mcp-hub"
+                href="https://github.com/amani-patrick/mcp-hub"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
