@@ -1,0 +1,50 @@
+[
+  {
+    "id": "evt-101",
+    "timestamp": "2023-11-01T12:00:00Z",
+    "level": "WARN",
+    "source": "auth",
+    "message": "Failed login",
+    "metadata": { "ip": "10.10.10.10", "userId": "admin" }
+  },
+  {
+    "id": "evt-102",
+    "timestamp": "2023-11-01T12:00:05Z",
+    "level": "WARN",
+    "source": "auth",
+    "message": "Failed login",
+    "metadata": { "ip": "10.10.10.10", "userId": "admin" }
+  },
+  {
+    "id": "evt-103",
+    "timestamp": "2023-11-01T12:00:10Z",
+    "level": "WARN",
+    "source": "auth",
+    "message": "Failed login",
+    "metadata": { "ip": "10.10.10.10", "userId": "admin" }
+  },
+  {
+    "id": "evt-104",
+    "timestamp": "2023-11-01T12:00:15Z",
+    "level": "WARN",
+    "source": "auth",
+    "message": "Failed login",
+    "metadata": { "ip": "10.10.10.10", "userId": "admin" }
+  },
+  {
+    "id": "evt-105",
+    "timestamp": "2023-11-01T12:01:00Z",
+    "level": "INFO",
+    "source": "auth",
+    "message": "Login successful",
+    "metadata": { "ip": "10.10.10.10", "userId": "admin", "sessionId": "sess-999" }
+  },
+  {
+    "id": "evt-106",
+    "timestamp": "2023-11-01T12:05:00Z",
+    "level": "INFO",
+    "source": "app",
+    "message": "Sensitive data accessed",
+    "metadata": { "userId": "admin", "sessionId": "sess-999", "file": "passwords.txt" }
+  }
+]

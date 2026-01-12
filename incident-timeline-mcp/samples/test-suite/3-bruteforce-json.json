@@ -1,0 +1,7 @@
+[
+  { "id": "1", "timestamp": "2023-01-01T12:00:00Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "10.0.0.66", "userId": "admin" } },
+  { "id": "2", "timestamp": "2023-01-01T12:00:01Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "10.0.0.66", "userId": "admin" } },
+  { "id": "3", "timestamp": "2023-01-01T12:00:02Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "10.0.0.66", "userId": "admin" } },
+  { "id": "4", "timestamp": "2023-01-01T12:00:03Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "10.0.0.66", "userId": "admin" } },
+  { "id": "5", "timestamp": "2023-01-01T12:00:04Z", "level": "ERROR", "source": "auth", "message": "Account locked", "metadata": { "ip": "10.0.0.66", "userId": "admin" } }
+]

@@ -1,0 +1,9 @@
+[
+  { "id": "1", "timestamp": "2023-01-01T08:00:00Z", "level": "INFO", "source": "cron", "message": "Job started", "metadata": { "job": "backup" } },
+  { "id": "2", "timestamp": "2023-01-01T08:01:00Z", "level": "INFO", "source": "cron", "message": "Job finished", "metadata": { "job": "backup" } },
+  { "id": "3", "timestamp": "2023-01-01T09:00:00Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "192.168.1.100" } },
+  { "id": "4", "timestamp": "2023-01-01T09:00:01Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "192.168.1.100" } },
+  { "id": "5", "timestamp": "2023-01-01T09:00:02Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "192.168.1.100" } },
+  { "id": "6", "timestamp": "2023-01-01T09:00:03Z", "level": "WARN", "source": "auth", "message": "Failed login", "metadata": { "ip": "192.168.1.100" } },
+  { "id": "7", "timestamp": "2023-01-01T10:00:00Z", "level": "INFO", "source": "web", "message": "Request served", "metadata": { "path": "/index.html" } }
+]

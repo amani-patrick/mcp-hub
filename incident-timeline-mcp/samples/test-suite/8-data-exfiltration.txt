@@ -1,0 +1,5 @@
+Jan 01 22:00:00 server1 auth: Accepted password for user data_analyst from 192.168.1.50
+Jan 01 22:01:00 server1 app: INFO User data_analyst accessed /api/v1/customers
+Jan 01 22:01:05 server1 app: INFO User data_analyst accessed /api/v1/payments
+Jan 01 22:01:10 server1 app: INFO User data_analyst accessed /api/v1/secrets
+Jan 01 22:01:15 server1 app: WARN Large data download detected (500MB) by user data_analyst

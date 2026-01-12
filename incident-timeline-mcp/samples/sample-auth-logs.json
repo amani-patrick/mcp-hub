@@ -1,0 +1,57 @@
+[
+  {
+    "id": "evt-001",
+    "timestamp": "2023-10-27T10:00:00Z",
+    "level": "INFO",
+    "source": "auth-service",
+    "message": "User login successful",
+    "metadata": {
+      "userId": "user-123",
+      "ip": "192.168.1.100"
+    }
+  },
+  {
+    "id": "evt-002",
+    "timestamp": "2023-10-27T10:05:00Z",
+    "level": "WARN",
+    "source": "auth-service",
+    "message": "Failed login attempt",
+    "metadata": {
+      "userId": "user-456",
+      "ip": "10.0.0.5"
+    }
+  },
+  {
+    "id": "evt-003",
+    "timestamp": "2023-10-27T10:05:05Z",
+    "level": "WARN",
+    "source": "auth-service",
+    "message": "Failed login attempt",
+    "metadata": {
+      "userId": "user-456",
+      "ip": "10.0.0.5"
+    }
+  },
+  {
+    "id": "evt-004",
+    "timestamp": "2023-10-27T10:05:10Z",
+    "level": "ERROR",
+    "source": "auth-service",
+    "message": "Account locked due to too many failed attempts",
+    "metadata": {
+      "userId": "user-456",
+      "ip": "10.0.0.5"
+    }
+  },
+  {
+    "id": "evt-005",
+    "timestamp": "2023-10-27T10:10:00Z",
+    "level": "INFO",
+    "source": "api-gateway",
+    "message": "Request received",
+    "metadata": {
+      "ip": "192.168.1.100",
+      "path": "/api/v1/data"
+    }
+  }
+]

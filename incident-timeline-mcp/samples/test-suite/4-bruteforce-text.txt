@@ -1,0 +1,5 @@
+2023-01-01 14:00:00 WARN auth-service: Failed login attempt for user root from 172.16.0.5
+2023-01-01 14:00:05 WARN auth-service: Failed login attempt for user root from 172.16.0.5
+2023-01-01 14:00:10 WARN auth-service: Failed login attempt for user root from 172.16.0.5
+2023-01-01 14:00:15 WARN auth-service: Failed login attempt for user root from 172.16.0.5
+2023-01-01 14:00:20 ERROR auth-service: Max failed attempts reached for IP 172.16.0.5

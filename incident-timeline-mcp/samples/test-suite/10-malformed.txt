@@ -1,0 +1,4 @@
+This is just some random text file.
+It does not look like a log.
+No timestamps here.
+Just garbage data.

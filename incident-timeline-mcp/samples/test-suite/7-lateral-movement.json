@@ -1,0 +1,6 @@
+[
+  { "id": "1", "timestamp": "2023-01-01T14:00:00Z", "level": "INFO", "source": "auth", "message": "Login successful", "metadata": { "ip": "10.0.0.5", "userId": "user1", "sessionId": "sess-A" } },
+  { "id": "2", "timestamp": "2023-01-01T14:05:00Z", "level": "INFO", "source": "ssh", "message": "SSH connection established", "metadata": { "sourceIp": "10.0.0.5", "destIp": "10.0.0.20", "userId": "user1" } },
+  { "id": "3", "timestamp": "2023-01-01T14:06:00Z", "level": "INFO", "source": "auth", "message": "Login successful", "metadata": { "ip": "10.0.0.20", "userId": "admin", "sessionId": "sess-B" } },
+  { "id": "4", "timestamp": "2023-01-01T14:10:00Z", "level": "WARN", "source": "app", "message": "Sensitive config accessed", "metadata": { "userId": "admin", "sessionId": "sess-B" } }
+]

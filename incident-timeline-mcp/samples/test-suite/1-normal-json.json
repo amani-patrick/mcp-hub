@@ -1,0 +1,5 @@
+[
+  { "id": "1", "timestamp": "2023-01-01T10:00:00Z", "level": "INFO", "source": "auth", "message": "Login successful", "metadata": { "ip": "192.168.1.10", "userId": "alice" } },
+  { "id": "2", "timestamp": "2023-01-01T10:05:00Z", "level": "INFO", "source": "app", "message": "Page view", "metadata": { "ip": "192.168.1.10", "path": "/home" } },
+  { "id": "3", "timestamp": "2023-01-01T10:10:00Z", "level": "INFO", "source": "auth", "message": "Logout", "metadata": { "ip": "192.168.1.10", "userId": "alice" } }
+]

@@ -1,0 +1,6 @@
+Jan 10 10:00:00 server1 auth[123]: Failed login from 192.168.1.50
+Jan 10 10:00:01 server1 auth[123]: Failed login from 192.168.1.50
+Jan 10 10:00:02 server1 auth[123]: Failed login from 192.168.1.50
+Jan 10 10:00:03 server1 auth[123]: Failed login from 192.168.1.50
+Jan 10 10:05:00 server1 app[456]: INFO User admin logged in from 192.168.1.50
+Jan 10 10:10:00 server1 db[789]: ERROR Connection timeout to database
