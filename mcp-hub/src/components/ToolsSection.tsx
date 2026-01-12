@@ -1,34 +1,42 @@
 import { motion } from "framer-motion";
 import MCPCard from "./MCPCard";
-import { Github } from "lucide-react";
+import { Github, Ship, Container, Cloud } from "lucide-react";
 
 const mcpTools = [
   {
-    id: "doc-qa",
-    title: "Local Document Q&A",
+    id: "kubernetes-mcp",
+    title: "Kubernetes MCP",
     description:
-      "Ask natural language questions over local documents with cited answers. Designed for private, offline workflows.",
-    icon: null,
+      "Safe, bounded Kubernetes operations for LLMs. Inspect clusters, manage workloads, and perform guarded deployments.",
+    icon: <Ship className="w-6 h-6" />,
     features: [
-      "PDF & Markdown ingestion",
-      "Local embedding + vector search",
-      "Answer + source snippets",
+      "Namespace-scoped access",
+      "Guarded deletion",
+      "Deployment scaling",
     ],
   },
   {
-    id: "api-contract-validator",
-    title: "API Contract Validator",
+    id: "registry-mcp",
+    title: "Registry MCP",
     description:
-      "Enterprise-grade API validation with enhanced security scanning, performance analysis, and breaking change detection.",
-    icon: null,
+      "Secure governance for container registries. Inspect images and verify policy compliance with strict guardrails.",
+    icon: <Container className="w-6 h-6" />,
     features: [
-      "OpenAPI spec validation",
-      "Enhanced security scanning",
-      "Performance analysis",
-      "Breaking change detection",
-      "Client impact analysis",
-      "Migration suggestions",
-      "Visual diff comparisons",
+      "Policy verification",
+      "Manifest analysis",
+      "Safe tag deletion",
+    ],
+  },
+  {
+    id: "cloud-containers-mcp",
+    title: "Cloud Containers MCP",
+    description:
+      "Abstracted management for AWS ECS. Deploy, scale, and observe services with built-in operational limits.",
+    icon: <Cloud className="w-6 h-6" />,
+    features: [
+      "Service scaling",
+      "CloudWatch logs",
+      "Zero-downtime restarts",
     ],
   },
 ];

@@ -3,41 +3,52 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MCPCard from "@/components/MCPCard";
-import { FileText, Shield, Zap, Code, AlertTriangle, TrendingUp } from "lucide-react";
+import { FileText, Shield, Zap, Code, AlertTriangle, TrendingUp, Ship, Container, Cloud } from "lucide-react";
 
 const mcpTools = [
   {
-    id: "doc-qa",
-    title: "Local Document Q&A MCP",
+    id: "kubernetes-mcp",
+    title: "Kubernetes MCP",
     description:
-      "A powerful document question-answering system that runs entirely locally. No paid APIs required — just upload your documents and get intelligent answers with citations.",
-    icon: <FileText className="w-6 h-6" />,
-    badge: "🥈 Second Best",
+      "A production-grade interface for safe, bounded Kubernetes operations. Enables LLMs to inspect clusters, manage workloads, and perform guarded deployments without unrestricted admin access.",
+    icon: <Ship className="w-6 h-6" />,
+    badge: "🛡️ Production Ready",
     features: [
-      "Upload PDFs & Markdown files",
-      "Local embeddings with sentence-transformers",
-      "Vector search for semantic matching",
-      "Answers with source citations",
-      "Zero external API dependencies",
+      "Namespace-scoped access control",
+      "Guarded resource deletion",
+      "Deployment scaling & rollouts",
+      "Pod inspection & logs",
+      "Manifest application with policy checks",
     ],
   },
   {
-    id: "api-contract-validator",
-    title: "API Contract Validator MCP",
+    id: "registry-mcp",
+    title: "Registry MCP",
     description:
-      "Enterprise-grade API validation with enhanced security scanning, performance analysis, and breaking change detection. Ensures your frontend and backend APIs stay in sync.",
-    icon: <Shield className="w-6 h-6" />,
-    badge: "🏆 Featured",
+      "Secure governance for container registries. Allows agents to inspect images, verify policy compliance, and manage tags across Docker Hub and V2-compliant registries with strict safety guardrails.",
+    icon: <Container className="w-6 h-6" />,
+    badge: "🔒 Secure",
     features: [
-      "OpenAPI spec validation",
-      "Enhanced security scanning",
-      "Performance analysis",
-      "Custom validation rules",
-      "Breaking change detection",
-      "Client impact analysis",
-      "Migration suggestions",
-      "Visual diff comparisons",
-      "CI/CD integration ready",
+      "Image policy verification",
+      "Cross-registry tag inspection",
+      "Manifest analysis",
+      "Safe tag deletion with allowlists",
+      "Vulnerability scanning integration",
+    ],
+  },
+  {
+    id: "cloud-containers-mcp",
+    title: "Cloud Containers MCP",
+    description:
+      "Abstracted management for serverless container platforms like AWS ECS. Provides a unified interface for deploying, scaling, and observing containerized services with built-in operational limits.",
+    icon: <Cloud className="w-6 h-6" />,
+    badge: "☁️ Cloud Native",
+    features: [
+      "Multi-region environment discovery",
+      "Safe service scaling with limits",
+      "Real-time CloudWatch log streaming",
+      "Zero-downtime restarts",
+      "Guarded service deletion",
     ],
   },
 ];
