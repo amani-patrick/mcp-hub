@@ -103,7 +103,26 @@ export default {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "grid-pattern": "linear-gradient(to right, hsl(222 30% 15% / 0.3) 1px, transparent 1px), linear-gradient(to bottom, hsl(222 30% 15% / 0.3) 1px, transparent 1px)",
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "none",
+            color: "hsl(var(--foreground) / 0.9)",
+            a: {
+              color: "hsl(var(--primary))",
+              textDecoration: "underline",
+              fontWeight: "500",
+            },
+            strong: { color: "hsl(var(--foreground))" },
+            "code::before": { content: '""' },
+            "code::after": { content: '""' },
+          },
+        },
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+  ],
 } satisfies Config;

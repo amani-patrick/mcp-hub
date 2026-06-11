@@ -140,6 +140,18 @@
     border: 1px solid hsl(222 30% 15%);
   }
 
+  .doc-content {
+    @apply text-base;
+  }
+
+  .doc-content > :first-child {
+    @apply mt-0;
+  }
+
+  .doc-content > :last-child {
+    @apply mb-0;
+  }
+
   .nav-link {
     @apply text-muted-foreground hover:text-foreground transition-colors duration-200 font-medium;
   }
