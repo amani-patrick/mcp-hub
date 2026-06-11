@@ -6,6 +6,7 @@
   "workspaces": [
     "mcp-hub",
     "docker-mcp",
+    "git-mcp",
     "kubernetes-mcp",
     "registry-mcp",
     "cloud-containers-mcp",

@@ -11,6 +11,7 @@ const root = join(__dirname, "..");
 
 const packages = [
   { name: "docker-mcp", entry: "docker-mcp/build/index.js" },
+  { name: "git-mcp", entry: "git-mcp/build/index.js" },
   { name: "kubernetes-mcp", entry: "kubernetes-mcp/build/index.js" },
   { name: "registry-mcp", entry: "registry-mcp/build/index.js" },
   { name: "cloud-containers-mcp", entry: "cloud-containers-mcp/build/index.js" },

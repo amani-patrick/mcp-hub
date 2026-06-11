@@ -13,6 +13,7 @@ const root = join(__dirname, "..");
 
 const servers = [
   { name: "docker-mcp", entry: "docker-mcp/build/index.js", skipPatterns: ["Docker"] },
+  { name: "git-mcp", entry: "git-mcp/build/index.js", skipPatterns: ["git", "Not a git repository"] },
   { name: "kubernetes-mcp", entry: "kubernetes-mcp/build/index.js", skipPatterns: ["Kubernetes", "KUBECONFIG"] },
   { name: "registry-mcp", entry: "registry-mcp/build/index.js", skipPatterns: [] },
   { name: "cloud-containers-mcp", entry: "cloud-containers-mcp/build/index.js", skipPatterns: ["AWS", "credentials"] },

@@ -49,6 +49,7 @@ npm run dev -w @amani-patrick/mcp-hub
 | [Registry MCP](./registry-mcp/README.md) | Beta | Container registry governance |
 | [Cloud Containers MCP](./cloud-containers-mcp/README.md) | Beta | AWS ECS management |
 | [Docker MCP](./docker-mcp/README.md) | Beta | Safe local Docker ops |
+| [Git MCP](./git-mcp/README.md) | Beta | Tiered Git with path allowlists |
 | [API Contract Validator](./API_ContractValidator/README.md) | Stable | OpenAPI validation & breaking changes |
 | [API Performance Monitor](./api-performance-monitor/README.md) | Stable | SLA monitoring & analytics |
 | [Cloud Risk Scanner](./cloud-risk-scanner/README.md) | Stable | IaC misconfiguration scanning |

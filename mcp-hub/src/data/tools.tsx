@@ -1,4 +1,4 @@
-import { Ship, Container, Cloud, Shield, Activity, AlertTriangle, Clock, LucideIcon } from "lucide-react";
+import { Ship, Container, Cloud, Shield, Activity, AlertTriangle, Clock, GitBranch, LucideIcon } from "lucide-react";
 
 export type ToolMaturity = "stable" | "beta" | "docs-wip";
 
@@ -19,13 +19,15 @@ export interface MCPTool {
   githubPath: string;
 }
 
+export type McpServerConfigInput = Pick<MCPTool, "id" | "repoPath" | "entryPoint" | "env">;
+
 const REPO_PLACEHOLDER = "/path/to/mcp-hub";
 
-export function getServerPath(tool: MCPTool): string {
+export function getServerPath(tool: Pick<MCPTool, "repoPath" | "entryPoint">): string {
   return `${REPO_PLACEHOLDER}/${tool.repoPath}/${tool.entryPoint}`;
 }
 
-export function buildMcpConfig(tool: MCPTool, serverKey?: string): string {
+export function buildMcpConfig(tool: McpServerConfigInput, serverKey?: string): string {
   const key = serverKey ?? tool.id.replace(/-mcp$/, "").replace(/-/g, "_");
   const config: Record<string, unknown> = {
     command: "node",
@@ -73,7 +75,7 @@ export const mcpTools: MCPTool[] = [
         repoPath: "kubernetes-mcp",
         entryPoint: "build/index.js",
         env: { KUBECONFIG: "/path/to/kubeconfig" },
-      } as MCPTool,
+      },
       "kubernetes"
     ),
     usage: "Ask Claude to 'list pods in default namespace' or 'scale deployment my-app to 3 replicas'.",
@@ -112,7 +114,7 @@ export const mcpTools: MCPTool[] = [
           REGISTRY_USERNAME: "your-username",
           REGISTRY_PASSWORD: "your-password",
         },
-      } as MCPTool,
+      },
       "registry"
     ),
     usage: "Ask Claude to 'check if image alpine:latest is compliant' or 'list tags for nginx'.",
@@ -143,7 +145,7 @@ export const mcpTools: MCPTool[] = [
         repoPath: "cloud-containers-mcp",
         entryPoint: "build/index.js",
         env: { AWS_REGION: "us-east-1", AWS_PROFILE: "default" },
-      } as MCPTool,
+      },
       "cloud-containers"
     ),
     usage: "Ask Claude to 'scale service my-api to 5 instances' or 'show me the logs for the payment-service'.",
@@ -174,11 +176,42 @@ export const mcpTools: MCPTool[] = [
         repoPath: "docker-mcp",
         entryPoint: "build/index.js",
         env: { ALLOWED_BUILD_PATHS: "/path/to/your/projects" },
-      } as MCPTool,
+      },
       "docker"
     ),
     usage: "Ask Claude to 'list running containers' or 'build image from ./my-app'.",
     githubPath: "docker-mcp",
+  },
+  {
+    id: "git-mcp",
+    title: "Git MCP",
+    description:
+      "Safe Git operations for AI agents. Inspect history and diffs read-only, stage and commit with guardrails, and perform destructive actions only with explicit confirmation and repo path allowlists.",
+    icon: GitBranch,
+    badge: "Version Control",
+    maturity: "beta",
+    repoPath: "git-mcp",
+    entryPoint: "build/index.js",
+    env: { ALLOWED_REPO_PATHS: "/path/to/your/projects,/path/to/mcp-hub" },
+    features: [
+      "Read-only status, log, diff, and blame-style history",
+      "Guarded checkout, stash, add, commit, fetch, and pull",
+      "Destructive reset, push, branch delete, and clean with confirm gates",
+      "Protected branch enforcement (main, master, develop)",
+      "Repository path sandboxing via ALLOWED_REPO_PATHS",
+    ],
+    installation: `git clone + npm run build -w git-mcp`,
+    configuration: buildMcpConfig(
+      {
+        id: "git-mcp",
+        repoPath: "git-mcp",
+        entryPoint: "build/index.js",
+        env: { ALLOWED_REPO_PATHS: "/path/to/your/projects,/path/to/mcp-hub" },
+      },
+      "git"
+    ),
+    usage: "Ask Claude to 'show git status for this repo' or 'list commits touching src/server.ts'.",
+    githubPath: "git-mcp",
   },
   {
     id: "api-contract-validator",
@@ -203,7 +236,7 @@ export const mcpTools: MCPTool[] = [
         id: "api-contract-validator",
         repoPath: "API_ContractValidator",
         entryPoint: "dist/index.js",
-      } as MCPTool,
+      },
       "api-validator"
     ),
     usage: "Ask Claude to 'validate this response against schema' or 'check for breaking changes between spec v1 and v2'.",
@@ -234,7 +267,7 @@ export const mcpTools: MCPTool[] = [
         repoPath: "api-performance-monitor",
         entryPoint: "dist/index.js",
         env: { SLACK_WEBHOOK: "https://hooks.slack.com/..." },
-      } as MCPTool,
+      },
       "performance-monitor"
     ),
     usage: "Ask Claude to 'check SLA for /api/v1/users' or 'start the performance dashboard'.",
@@ -263,7 +296,7 @@ export const mcpTools: MCPTool[] = [
         id: "cloud-risk-scanner",
         repoPath: "cloud-risk-scanner",
         entryPoint: "dist/src/server.js",
-      } as MCPTool,
+      },
       "risk-scanner"
     ),
     usage: "Ask Claude to 'scan ./infrastructure for risks' or 'analyze this IAM policy'.",
@@ -292,7 +325,7 @@ export const mcpTools: MCPTool[] = [
         id: "incident-timeline-mcp",
         repoPath: "incident-timeline-mcp",
         entryPoint: "dist/server.js",
-      } as MCPTool,
+      },
       "incident-timeline"
     ),
     usage: "Ask Claude to 'build a timeline from ./app.log' or 'summarize the incident'.",
