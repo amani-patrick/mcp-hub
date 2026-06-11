@@ -1,15 +1,16 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { MemoryStorage } from '../storage/memory.js';
+import { sharedStorage } from '../storage/shared.js';
 
 export class StreamingServer {
   private wss: WebSocketServer;
   private storage: MemoryStorage;
   private intervals: Map<string, NodeJS.Timeout> = new Map();
 
-  constructor(httpServer: Server) {
+  constructor(httpServer: Server, storage: MemoryStorage = sharedStorage) {
     this.wss = new WebSocketServer({ server: httpServer });
-    this.storage = new MemoryStorage();
+    this.storage = storage;
     this.setupWebSocketServer();
   }
 

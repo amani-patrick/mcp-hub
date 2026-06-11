@@ -1,5 +1,5 @@
 import { ECSClient, ListClustersCommand, ListServicesCommand, DescribeServicesCommand, UpdateServiceCommand, DescribeTaskDefinitionCommand } from '@aws-sdk/client-ecs';
-import { CloudWatchLogsClient, GetLogEventsCommand } from '@aws-sdk/client-cloudwatch-logs';
+import { CloudWatchLogsClient, FilterLogEventsCommand } from '@aws-sdk/client-cloudwatch-logs';
 import { CloudPlatformAdapter, CloudEnvironment, CloudService } from './CloudPlatformAdapter.js';
 
 export class AwsEcsAdapter implements CloudPlatformAdapter {
@@ -42,21 +42,36 @@ export class AwsEcsAdapter implements CloudPlatformAdapter {
 
             if (serviceArns.length === 0) return [];
 
-            const descCmd = new DescribeServicesCommand({ cluster: environmentId, services: serviceArns });
-            const descResp = await this.ecsClient.send(descCmd);
+            const allServices = [];
+            for (let i = 0; i < serviceArns.length; i += 10) {
+                const batch = serviceArns.slice(i, i + 10);
+                const descResp = await this.ecsClient.send(
+                    new DescribeServicesCommand({ cluster: environmentId, services: batch })
+                );
+                allServices.push(...(descResp.services || []));
+            }
 
-            return (descResp.services || []).map(s => ({
+            return Promise.all(allServices.map(async s => ({
                 name: s.serviceName || 'unknown',
                 environment: environmentId,
                 status: s.status || 'UNKNOWN',
-                image: s.taskDefinition || 'unknown',
+                image: s.taskDefinition
+                    ? await this.resolveImage(s.taskDefinition)
+                    : 'unknown',
                 desiredCount: s.desiredCount,
                 runningCount: s.runningCount,
-            }));
+            })));
         } catch (error) {
             console.error(`Error listing services in ${environmentId}:`, error);
-            return [];
+            throw error;
         }
+    }
+
+    private async resolveImage(taskDefinitionArn: string): Promise<string> {
+        const tdResp = await this.ecsClient.send(
+            new DescribeTaskDefinitionCommand({ taskDefinition: taskDefinitionArn })
+        );
+        return tdResp.taskDefinition?.containerDefinitions?.[0]?.image || taskDefinitionArn;
     }
 
     async getServiceDetails(environmentId: string, serviceName: string): Promise<CloudService> {
@@ -72,7 +87,9 @@ export class AwsEcsAdapter implements CloudPlatformAdapter {
             name: service.serviceName || serviceName,
             environment: environmentId,
             status: service.status || 'UNKNOWN',
-            image: service.taskDefinition || 'unknown',
+            image: service.taskDefinition
+                ? await this.resolveImage(service.taskDefinition)
+                : 'unknown',
             desiredCount: service.desiredCount,
             runningCount: service.runningCount,
         };
@@ -97,19 +114,16 @@ export class AwsEcsAdapter implements CloudPlatformAdapter {
     }
 
     async getServiceLogs(environmentId: string, serviceName: string, tail: number = 100): Promise<string[]> {
-        // 1. Get Service to find Task Definition
         const svcCmd = new DescribeServicesCommand({ cluster: environmentId, services: [serviceName] });
         const svcResp = await this.ecsClient.send(svcCmd);
         const service = svcResp.services?.[0];
-        if (!service || !service.taskDefinition) {
+        if (!service?.taskDefinition) {
             throw new Error(`Service ${serviceName} not found or has no task definition`);
         }
 
-        // 2. Get Task Definition to find Log Configuration
         const tdCmd = new DescribeTaskDefinitionCommand({ taskDefinition: service.taskDefinition });
         const tdResp = await this.ecsClient.send(tdCmd);
         const containerDef = tdResp.taskDefinition?.containerDefinitions?.[0];
-
         if (!containerDef) {
             throw new Error('No container definition found');
         }
@@ -121,45 +135,22 @@ export class AwsEcsAdapter implements CloudPlatformAdapter {
 
         const group = logConf.options['awslogs-group'];
         const streamPrefix = logConf.options['awslogs-stream-prefix'];
-
-        if (!group || !streamPrefix) {
-            throw new Error('Missing awslogs-group or awslogs-stream-prefix');
+        if (!group) {
+            throw new Error('Missing awslogs-group in task definition');
         }
 
-        // 3. Fetch logs from CloudWatch
-        // Note: We need a log stream name. Usually it's prefix/containerName/taskID.
-        // Without a specific task ID, we can't easily get a specific stream.
-        // However, we can query the group. For simplicity in this tool, we'll try to get the latest stream.
-        // A robust production implementation would list streams or allow filtering by task.
-        // Here we will just list the latest stream for the service.
+        const filterResp = await this.logsClient.send(new FilterLogEventsCommand({
+            logGroupName: group,
+            logStreamNamePrefix: streamPrefix,
+            limit: tail,
+        }));
 
-        // For now, we'll just return a message saying we need the stream name logic which is complex
-        // But wait, the user said "senior production ready". 
-        // I should try to list streams.
+        const messages = (filterResp.events || [])
+            .map(e => e.message?.trim())
+            .filter(Boolean) as string[];
 
-        // Let's assume we want logs from the *service* which implies multiple tasks.
-        // We can use filterLogEvents to search across streams in the group.
-
-        // Actually, let's just use the group and limit.
-
-        try {
-            const logCmd = new GetLogEventsCommand({
-                logGroupName: group,
-                // We need a stream name. Let's try to construct one or list them.
-                // Listing streams requires DescribeLogStreams.
-                // For this implementation, I will assume we can't easily guess the stream without listing.
-                // I'll throw a specific error if we can't get it, but let's try to be helpful.
-                logStreamName: `${streamPrefix}/${containerDef.name}/latest` // Placeholder guess
-            });
-
-            // Since we can't easily guess, let's just return the config info so the user knows it's working
-            // and would work if we had a running task ID.
-            // OR, I can implement DescribeLogStreams.
-
-            return [`Log Group: ${group}`, `Stream Prefix: ${streamPrefix}`, "To fetch actual logs, we need to list active streams which requires DescribeLogStreams permission."];
-
-        } catch (e) {
-            return [`Log Group: ${group}`, `Stream Prefix: ${streamPrefix}`, `Error fetching logs: ${e}`];
-        }
+        return messages.length > 0
+            ? messages
+            : [`No log events found in group ${group} (prefix: ${streamPrefix || 'none'})`];
     }
 }

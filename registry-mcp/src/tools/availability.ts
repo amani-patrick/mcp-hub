@@ -1,5 +1,6 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { registryAdapter } from '../config.js';
+import axios from 'axios';
 
 export const availabilityTools: Tool[] = [
     {
@@ -15,7 +16,6 @@ export const availabilityTools: Tool[] = [
             required: ['repository', 'reference'],
         },
     },
-
 ];
 
 export async function handleAvailabilityTool(name: string, args: any) {
@@ -24,15 +24,17 @@ export async function handleAvailabilityTool(name: string, args: any) {
             try {
                 await registryAdapter.getManifest(args.namespace || '', args.repository, args.reference);
                 return {
-                    content: [{ type: 'text', text: 'true' }],
+                    content: [{ type: 'text', text: JSON.stringify({ exists: true }) }],
                 };
             } catch (error) {
-                return {
-                    content: [{ type: 'text', text: 'false' }],
-                };
+                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                    return {
+                        content: [{ type: 'text', text: JSON.stringify({ exists: false }) }],
+                    };
+                }
+                throw error;
             }
         }
-
         default:
             throw new Error(`Unknown tool: ${name}`);
     }

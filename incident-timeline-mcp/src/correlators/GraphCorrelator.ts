@@ -2,10 +2,10 @@ import { LogEvent } from "../models/event";
 import { TimelineEvent } from "../models/timeline";
 import { Correlator } from "../core/types";
 
+const CORRELATION_KEYS = ["ip", "userId", "deviceId", "sessionId"] as const;
+
 export class GraphCorrelator implements Correlator {
     async correlate(events: LogEvent[]): Promise<TimelineEvent[]> {
-        // Adjacency list: Node -> Set of connected Nodes
-        // Nodes can be Event IDs or Entity IDs (e.g., "IP:1.2.3.4", "User:alice")
         const adj = new Map<string, Set<string>>();
 
         const addEdge = (u: string, v: string) => {
@@ -15,15 +15,14 @@ export class GraphCorrelator implements Correlator {
             adj.get(v)!.add(u);
         };
 
-        // Build the graph
         for (const event of events) {
             const eventNode = `Event:${event.id}`;
+            // Ensure every event participates in the graph (even without metadata)
+            if (!adj.has(eventNode)) adj.set(eventNode, new Set());
 
-            // Link Event to its Entities
             if (event.metadata) {
                 for (const [key, value] of Object.entries(event.metadata)) {
-                    // Only correlate on specific keys to avoid noise
-                    if (["ip", "userId", "deviceId", "sessionId"].includes(key)) {
+                    if (CORRELATION_KEYS.includes(key as typeof CORRELATION_KEYS[number])) {
                         const entityNode = `${key}:${value}`;
                         addEdge(eventNode, entityNode);
                     }
@@ -31,7 +30,6 @@ export class GraphCorrelator implements Correlator {
             }
         }
 
-        // Find connected components (BFS/DFS)
         const visited = new Set<string>();
         const components: string[][] = [];
 
@@ -47,8 +45,7 @@ export class GraphCorrelator implements Correlator {
                         component.push(curr.replace("Event:", ""));
                     }
 
-                    const neighbors = adj.get(curr) || new Set();
-                    for (const neighbor of neighbors) {
+                    for (const neighbor of adj.get(curr) || []) {
                         if (!visited.has(neighbor)) {
                             visited.add(neighbor);
                             queue.push(neighbor);
@@ -59,25 +56,23 @@ export class GraphCorrelator implements Correlator {
             }
         }
 
-        // Map events to TimelineEvents with relationships
         const eventMap = new Map(events.map(e => [e.id, e]));
         const timelineEvents: TimelineEvent[] = [];
 
-        for (const component of components) {
-            // All events in this component are related
+        for (let i = 0; i < components.length; i++) {
+            const component = components[i];
             for (const eventId of component) {
                 const originalEvent = eventMap.get(eventId);
                 if (originalEvent) {
                     timelineEvents.push({
                         ...originalEvent,
                         relatedEvents: component.filter(id => id !== eventId),
-                        tags: [`Cluster:${components.indexOf(component)}`]
+                        tags: [`Cluster:${i}`],
                     });
                 }
             }
         }
 
-        // Sort by timestamp
         return timelineEvents.sort((a, b) =>
             new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );

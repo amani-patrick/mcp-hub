@@ -85,6 +85,7 @@ export async function handleGuardedTool(name: string, args: any) {
             const createOptions: any = {
                 Image: args.image,
                 name: args.containerName,
+                ExposedPorts: {},
                 HostConfig: {
                     Memory: profile.memoryLimit ? parseMemory(profile.memoryLimit) : undefined,
                     RestartPolicy: profile.restart ? { Name: profile.restart } : undefined,
@@ -94,10 +95,10 @@ export async function handleGuardedTool(name: string, args: any) {
                 Env: [],
             };
 
-            // Apply ports
             if (profile.ports) {
                 profile.ports.forEach(p => {
                     const [host, container] = p.split(':');
+                    createOptions.ExposedPorts[`${container}/tcp`] = {};
                     createOptions.HostConfig.PortBindings[`${container}/tcp`] = [{ HostPort: host }];
                 });
             }

@@ -29,12 +29,22 @@ export const BruteForceRule: Rule = {
             e.message.toLowerCase().includes("failed login") && e.metadata?.ip
         );
 
-        const ipCounts: Record<string, number> = {};
+        const byIp = new Map<string, number[]>();
         for (const event of failedLogins) {
-            const ip = event.metadata!.ip;
-            ipCounts[ip] = (ipCounts[ip] || 0) + 1;
+            const ip = event.metadata!.ip as string;
+            const ts = new Date(event.timestamp).getTime();
+            if (!byIp.has(ip)) byIp.set(ip, []);
+            byIp.get(ip)!.push(ts);
         }
 
-        return Object.values(ipCounts).some(count => count > 3);
+        const windowMs = 60_000;
+        for (const timestamps of byIp.values()) {
+            timestamps.sort((a, b) => a - b);
+            for (let i = 0; i < timestamps.length; i++) {
+                const countInWindow = timestamps.filter(t => t - timestamps[i] <= windowMs).length;
+                if (countInWindow > 3) return true;
+            }
+        }
+        return false;
     }
 };

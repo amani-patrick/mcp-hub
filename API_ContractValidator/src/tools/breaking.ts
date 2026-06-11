@@ -37,6 +37,12 @@ function normalizeMethod(method: string): string {
   return method.toUpperCase();
 }
 
+const HTTP_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace']);
+
+function isHttpMethod(key: string): boolean {
+  return HTTP_METHODS.has(key.toLowerCase());
+}
+
 export function detectBreakingChanges(
   oldRaw: string,
   newRaw: string
@@ -61,6 +67,7 @@ export function detectBreakingChanges(
     }
 
     for (const method in oldPaths[path]) {
+      if (!isHttpMethod(method)) continue;
       if (!newPaths[path][method]) {
         changes.push({
           type: ChangeType.BREAKING,
@@ -111,6 +118,7 @@ export function detectBreakingChanges(
     }
 
     for (const method in newPaths[path]) {
+      if (!isHttpMethod(method)) continue;
       if (!oldPaths[path][method]) {
         changes.push({
           type: ChangeType.NON_BREAKING,

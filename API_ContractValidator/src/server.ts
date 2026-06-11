@@ -90,7 +90,9 @@ export function createServer() {
     return {
       content: [{
         type: "text" as const,
-        text: result.valid ? "Validation passed" : `Validation failed: ${result.errors.length} errors found`
+        text: result.valid
+          ? "Validation passed"
+          : `Validation failed: ${result.errors.length} errors\n${JSON.stringify(result.errors, null, 2)}`
       }],
       isError: !result.valid
     };

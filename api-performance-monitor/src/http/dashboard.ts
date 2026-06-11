@@ -1,6 +1,7 @@
 import express from 'express';
 import { Server } from 'http';
 import { MemoryStorage } from '../storage/memory.js';
+import { sharedStorage } from '../storage/shared.js';
 import { PerformanceAnalytics } from '../tools/analytics.js';
 import { SLAAlerts } from '../tools/alerts.js';
 import { RateLimiter } from '../middleware/rateLimit.js';
@@ -16,11 +17,11 @@ export class DashboardServer {
   private rateLimiter: RateLimiter;
   private auth: AuthMiddleware;
 
-  constructor(port: number = 3001, authConfig?: AuthConfig) {
+  constructor(port: number = 3001, authConfig?: AuthConfig, storage: MemoryStorage = sharedStorage) {
     this.app = express();
-    this.storage = new MemoryStorage();
-    this.analytics = new PerformanceAnalytics();
-    this.alerts = new SLAAlerts();
+    this.storage = storage;
+    this.analytics = new PerformanceAnalytics(storage);
+    this.alerts = new SLAAlerts(storage);
     
     // Use environment config with override
     this.rateLimiter = new RateLimiter(

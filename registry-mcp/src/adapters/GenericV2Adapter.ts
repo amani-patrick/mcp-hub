@@ -26,7 +26,10 @@ export class GenericV2Adapter implements RegistryAdapter {
             const repos: string[] = response.data.repositories || [];
 
             return repos
-                .filter(repo => !namespace || repo.startsWith(namespace))
+                .filter(repo => {
+                    if (!namespace) return true;
+                    return repo === namespace || repo.startsWith(`${namespace}/`);
+                })
                 .map(repo => {
                     const parts = repo.split('/');
                     return {

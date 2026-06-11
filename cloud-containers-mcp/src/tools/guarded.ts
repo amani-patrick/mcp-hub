@@ -16,9 +16,14 @@ export const guardedTools: Tool[] = [
     },
 ];
 
+import { isClusterAllowed } from '../config.js';
+
 export async function handleGuardedTool(name: string, args: any) {
     switch (name) {
         case 'delete_service': {
+            if (!isClusterAllowed(args.environmentId)) {
+                throw new Error(`Cluster not in allowlist: ${args.environmentId}`);
+            }
             if (args.confirm !== true) {
                 throw new Error('Operation cancelled: confirmation required (set confirm: true)');
             }

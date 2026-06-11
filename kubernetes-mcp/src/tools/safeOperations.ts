@@ -1,6 +1,6 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { k8sAppsApi, k8sCoreApi } from '../k8s.js';
-import { isNamespaceAllowed } from '../config.js';
+import { k8sAppsApi, k8sCoreApi, k8sNetworkingApi } from '../k8s.js';
+import { isNamespaceAllowed, MIN_REPLICAS, MAX_REPLICAS } from '../config.js';
 
 export const safeOperationsTools: Tool[] = [
     {
@@ -50,7 +50,9 @@ export async function handleSafeOperationsTool(name: string, args: any) {
 
     switch (name) {
         case 'scale_deployment': {
-            // In a real scenario, we would check min/max bounds here
+            if (args.replicas < MIN_REPLICAS || args.replicas > MAX_REPLICAS) {
+                throw new Error(`Replica count must be between ${MIN_REPLICAS} and ${MAX_REPLICAS}.`);
+            }
             const patch = [
                 {
                     op: 'replace',
@@ -76,22 +78,41 @@ export async function handleSafeOperationsTool(name: string, args: any) {
         case 'restart_deployment': {
             const patch = [
                 {
-                    op: 'add',
+                    op: 'replace',
                     path: '/spec/template/metadata/annotations/kubectl.kubernetes.io~1restartedAt',
                     value: new Date().toISOString(),
                 },
             ];
-            await k8sAppsApi.patchNamespacedDeployment(
-                args.deploymentName,
-                args.namespace,
-                patch,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                { headers: { 'Content-Type': 'application/json-patch+json' } }
-            );
+            try {
+                await k8sAppsApi.patchNamespacedDeployment(
+                    args.deploymentName,
+                    args.namespace,
+                    patch,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    { headers: { 'Content-Type': 'application/json-patch+json' } }
+                );
+            } catch (err: any) {
+                if (err?.body?.reason === 'Invalid' || err?.statusCode === 422) {
+                    const addPatch = [{ op: 'add' as const, path: '/spec/template/metadata/annotations/kubectl.kubernetes.io~1restartedAt', value: new Date().toISOString() }];
+                    await k8sAppsApi.patchNamespacedDeployment(
+                        args.deploymentName,
+                        args.namespace,
+                        addPatch,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        { headers: { 'Content-Type': 'application/json-patch+json' } }
+                    );
+                } else {
+                    throw err;
+                }
+            }
             return {
                 content: [{ type: 'text', text: `Deployment ${args.deploymentName} restarted.` }],
             };

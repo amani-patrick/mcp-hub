@@ -1,5 +1,5 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { cloudAdapter, CLOUD_CONFIG } from '../config.js';
+import { cloudAdapter, isClusterAllowed } from '../config.js';
 
 export const discoveryTools: Tool[] = [
     {
@@ -44,12 +44,18 @@ export async function handleDiscoveryTool(name: string, args: any) {
             };
         }
         case 'list_services': {
+            if (!isClusterAllowed(args.environmentId)) {
+                throw new Error(`Cluster not in allowlist: ${args.environmentId}`);
+            }
             const services = await cloudAdapter.listServices(args.environmentId);
             return {
                 content: [{ type: 'text', text: JSON.stringify(services, null, 2) }],
             };
         }
         case 'get_service_details': {
+            if (!isClusterAllowed(args.environmentId)) {
+                throw new Error(`Cluster not in allowlist: ${args.environmentId}`);
+            }
             const service = await cloudAdapter.getServiceDetails(args.environmentId, args.serviceName);
             return {
                 content: [{ type: 'text', text: JSON.stringify(service, null, 2) }],

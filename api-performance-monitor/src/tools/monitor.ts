@@ -1,12 +1,13 @@
 import { PerformanceMetrics } from '../types/performance.js';
 import { MemoryStorage } from '../storage/memory.js';
+import { sharedStorage } from '../storage/shared.js';
 
 export class PerformanceMonitor {
   private storage: MemoryStorage;
-  private slaThreshold: number = 1000; // Default 1 second SLA
+  private slaThreshold: number = 1000;
 
-  constructor() {
-    this.storage = new MemoryStorage();
+  constructor(storage: MemoryStorage = sharedStorage) {
+    this.storage = storage;
   }
 
   async recordMetrics(args: {

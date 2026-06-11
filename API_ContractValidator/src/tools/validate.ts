@@ -1,9 +1,9 @@
 import { Ajv } from "ajv";
-import addFormats from "ajv-formats";
 
 export function validateResponse(schema: object, response: unknown) {
     const ajv = new Ajv({ allErrors: true, strict: false });
-    addFormats(ajv);
+    ajv.addFormat("email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    ajv.addFormat("uri", /^(https?|ftp):\/\//);
     const validate = ajv.compile(schema);
 
     const valid = validate(response);

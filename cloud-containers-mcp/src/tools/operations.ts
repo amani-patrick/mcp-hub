@@ -1,5 +1,5 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { cloudAdapter, MAX_SCALE_LIMIT } from '../config.js';
+import { cloudAdapter, MAX_SCALE_LIMIT, MIN_SCALE_COUNT, isClusterAllowed } from '../config.js';
 
 export const operationsTools: Tool[] = [
     {
@@ -32,6 +32,12 @@ export const operationsTools: Tool[] = [
 export async function handleOperationsTool(name: string, args: any) {
     switch (name) {
         case 'scale_service': {
+            if (!isClusterAllowed(args.environmentId)) {
+                throw new Error(`Cluster not in allowlist: ${args.environmentId}`);
+            }
+            if (args.count < MIN_SCALE_COUNT) {
+                throw new Error(`Scale count must be at least ${MIN_SCALE_COUNT}.`);
+            }
             if (args.count > MAX_SCALE_LIMIT) {
                 throw new Error(`Scaling limit exceeded. Max allowed: ${MAX_SCALE_LIMIT}`);
             }
@@ -41,6 +47,9 @@ export async function handleOperationsTool(name: string, args: any) {
             };
         }
         case 'restart_service': {
+            if (!isClusterAllowed(args.environmentId)) {
+                throw new Error(`Cluster not in allowlist: ${args.environmentId}`);
+            }
             await cloudAdapter.restartService(args.environmentId, args.serviceName);
             return {
                 content: [{ type: 'text', text: `Service ${args.serviceName} restart triggered.` }],

@@ -4,7 +4,7 @@ export const securityTools: Tool[] = [
 
     {
         name: 'check_image_policy_compliance',
-        description: 'Validate image against org rules (no latest tag, signed, scan passed).',
+        description: 'Validate image against org rules. Currently checks: no latest tag in production contexts.',
         inputSchema: {
             type: 'object',
             properties: {

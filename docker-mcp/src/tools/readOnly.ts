@@ -131,8 +131,10 @@ export async function handleReadOnlyTool(name: string, args: any) {
             // Calculate CPU usage percentage (simplified)
             const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
             const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
-            const numberCpus = stats.cpu_stats.online_cpus;
-            const cpuPercent = (cpuDelta / systemCpuDelta) * numberCpus * 100.0;
+            const numberCpus = stats.cpu_stats.online_cpus || 1;
+            const cpuPercent = systemCpuDelta > 0
+                ? (cpuDelta / systemCpuDelta) * numberCpus * 100.0
+                : 0;
 
             // Memory usage
             const memoryUsage = stats.memory_stats.usage;

@@ -33,15 +33,23 @@ export async function buildTimeline(filePath: string): Promise<Timeline> {
     ruleEngine.registerRule(BruteForceRule);
     const findings = ruleEngine.evaluate(events);
 
-    const startTime = correlatedEvents[0].timestamp;
-    const endTime = correlatedEvents[correlatedEvents.length - 1].timestamp;
+    const taggedEvents = correlatedEvents.map(event => {
+        const tags = [...(event.tags || [])];
+        if (["ERROR", "CRITICAL", "FATAL"].includes(event.level.toUpperCase())) {
+            tags.push("CRITICAL");
+        }
+        return { ...event, tags };
+    });
+
+    const startTime = taggedEvents[0]?.timestamp ?? "";
+    const endTime = taggedEvents[taggedEvents.length - 1]?.timestamp ?? "";
 
     return {
         id: uuidv4(),
         title: `Incident Timeline - ${filePath}`,
         startTime,
         endTime,
-        events: correlatedEvents,
+        events: taggedEvents,
         summary: `Analyzed ${events.length} events. Findings: ${findings.join("; ")}`
     };
 }

@@ -10,6 +10,11 @@ import { ExternalMonitoringIntegration } from './integrations/external.js';
 import { MCPRateLimiter } from './middleware/rateLimit.js';
 import { MCPAuth } from './middleware/auth.js';
 import { env } from './config/env.js';
+import { sharedStorage } from './storage/shared.js';
+
+const monitor = new PerformanceMonitor();
+const analytics = new PerformanceAnalytics();
+const alerts = new SLAAlerts();
 
 const server = new McpServer({
   name: 'API Performance Monitor',
@@ -84,7 +89,6 @@ server.registerTool('monitor_performance', {
     timestamp: z.string().describe('ISO timestamp of request'),
   }),
 }, wrapTool('monitor_performance', async (args: any, context?: any) => {
-  const monitor = new PerformanceMonitor();
   const result = await monitor.recordMetrics(args as any);
   
   // Trigger external integration
@@ -107,7 +111,6 @@ server.registerTool('get_analytics', {
     endpoint: z.string().optional().describe('Specific endpoint to analyze'),
   }),
 }, wrapTool('get_analytics', async (args: any, context?: any) => {
-  const analytics = new PerformanceAnalytics();
   const result = await analytics.getAnalytics(args as any);
   
   return {
@@ -126,7 +129,6 @@ server.registerTool('check_sla', {
     endpoints: z.array(z.string()).describe('List of endpoints to check'),
   }),
 }, wrapTool('check_sla', async (args: any, context?: any) => {
-  const alerts = new SLAAlerts();
   const result = await alerts.checkSLA(args as any);
   
   // Send SLA violation alerts
@@ -161,12 +163,21 @@ server.registerTool('start_dashboard', {
     } : undefined
   };
   
-  dashboardServer = new DashboardServer(port, authConfig);
+  if (dashboardServer) {
+    return {
+      content: [{
+        type: 'text',
+        text: `Dashboard already running on port ${env.dashboardPort}`
+      }]
+    };
+  }
+
+  dashboardServer = new DashboardServer(port, authConfig, sharedStorage);
   
   // Start WebSocket streaming
   if (!streamingServer) {
     const httpServer = (dashboardServer as any).server;
-    streamingServer = new StreamingServer(httpServer);
+    streamingServer = new StreamingServer(httpServer, sharedStorage);
   }
   
   return {
@@ -218,7 +229,7 @@ server.registerTool('setup_external_monitoring', {
     }
   };
   
-  externalIntegration = new ExternalMonitoringIntegration(config);
+  externalIntegration = new ExternalMonitoringIntegration(config, sharedStorage);
   await externalIntegration.setupPeriodicIntegration();
   
   return {
@@ -298,13 +309,13 @@ async function main() {
       } : undefined
     };
     
-    dashboardServer = new DashboardServer(env.dashboardPort, authConfig);
+    dashboardServer = new DashboardServer(env.dashboardPort, authConfig, sharedStorage);
     console.error(`🚀 Dashboard auto-started on http://localhost:${env.dashboardPort}`);
     
     // Start WebSocket streaming
     if (!streamingServer) {
       const httpServer = (dashboardServer as any).server;
-      streamingServer = new StreamingServer(httpServer);
+      streamingServer = new StreamingServer(httpServer, sharedStorage);
     }
   }
   
@@ -329,7 +340,7 @@ async function main() {
       } : undefined
     };
     
-    externalIntegration = new ExternalMonitoringIntegration(config);
+    externalIntegration = new ExternalMonitoringIntegration(config, sharedStorage);
     await externalIntegration.setupPeriodicIntegration();
     console.error('📡 External monitoring integrations auto-configured');
   }

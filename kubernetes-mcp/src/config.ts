@@ -4,6 +4,9 @@
 // In a real scenario, this might be loaded from env vars or a config file
 export const ALLOWED_NAMESPACES = ['default', 'dev', 'staging'];
 
+export const MIN_REPLICAS = 0;
+export const MAX_REPLICAS = 10;
+
 // Resources that are completely blocked from access
 export const BLOCKED_RESOURCES = [
     'Secret',

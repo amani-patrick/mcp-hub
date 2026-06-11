@@ -1,5 +1,6 @@
 import { PerformanceMetrics } from '../types/performance.js';
 import { MemoryStorage } from '../storage/memory.js';
+import { sharedStorage } from '../storage/shared.js';
 
 export interface ExternalMonitoringConfig {
   datadog?: {
@@ -24,9 +25,9 @@ export class ExternalMonitoringIntegration {
   private config: ExternalMonitoringConfig;
   private storage: MemoryStorage;
 
-  constructor(config: ExternalMonitoringConfig) {
+  constructor(config: ExternalMonitoringConfig, storage: MemoryStorage = sharedStorage) {
     this.config = config;
-    this.storage = new MemoryStorage();
+    this.storage = storage;
   }
 
   async sendToDatadog(metrics: PerformanceMetrics[]): Promise<void> {

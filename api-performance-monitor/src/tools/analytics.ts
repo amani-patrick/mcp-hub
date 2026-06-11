@@ -1,13 +1,13 @@
 import { AnalyticsData, PerformanceMetrics } from '../types/performance.js';
-import { PerformanceMonitor } from './monitor.js';
 import { MemoryStorage } from '../storage/memory.js';
+import { sharedStorage } from '../storage/shared.js';
 
 export class PerformanceAnalytics {
   private storage: MemoryStorage;
   private slaThreshold: number = 1000;
 
-  constructor() {
-    this.storage = new MemoryStorage();
+  constructor(storage: MemoryStorage = sharedStorage) {
+    this.storage = storage;
   }
 
   async getAnalytics(args: {

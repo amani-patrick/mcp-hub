@@ -1,11 +1,12 @@
 import { AlertConfig, SLAViolation } from '../types/alerts.js';
 import { MemoryStorage } from '../storage/memory.js';
+import { sharedStorage } from '../storage/shared.js';
 
 export class SLAAlerts {
   private storage: MemoryStorage;
 
-  constructor() {
-    this.storage = new MemoryStorage();
+  constructor(storage: MemoryStorage = sharedStorage) {
+    this.storage = storage;
   }
 
   async checkSLA(args: AlertConfig): Promise<{
