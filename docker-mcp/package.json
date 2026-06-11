@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "description": "A Model Context Protocol server for safe Docker interaction",
   "main": "build/index.js",
+  "bin": {
+    "docker-mcp": "./build/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "verify": "npm run build && node verify.mjs"
   },
   "keywords": [
     "mcp",
@@ -14,7 +18,7 @@
     "ai",
     "llm"
   ],
-  "author": "",
+  "author": "Amani Patrick",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.1",

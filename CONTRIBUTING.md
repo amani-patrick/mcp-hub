@@ -405,9 +405,9 @@ We are committed to providing a welcoming and inclusive environment. Please:
 
 ### Getting Help
 
-- **Discussions**: Use GitHub Discussions for questions
+- **Discussions**: Use [GitHub Discussions](https://github.com/amani-patrick/mcp-hub/discussions) for questions
 - **Issues**: Use issues for bugs and feature requests
-- **Discord**: Join our community Discord (link in README)
+- **Good First Issues**: See [GOOD_FIRST_ISSUES.md](./GOOD_FIRST_ISSUES.md)
 
 ## 🏆 Recognition
 
@@ -431,7 +431,6 @@ We value all types of contributions:
 
 - **GitHub Issues**: [Create an issue](https://github.com/amani-patrick/mcp-hub/issues)
 - **GitHub Discussions**: [Start a discussion](https://github.com/amani-patrick/mcp-hub/discussions)
-- **Email**: [amani.patrick@example.com](mailto:amani.patrick@example.com)
 
 ## 📚 Additional Resources
 

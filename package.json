@@ -1,0 +1,33 @@
+{
+  "name": "mcp-hub-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Community MCP tools and documentation hub",
+  "workspaces": [
+    "mcp-hub",
+    "docker-mcp",
+    "kubernetes-mcp",
+    "registry-mcp",
+    "cloud-containers-mcp",
+    "cloud-risk-scanner",
+    "incident-timeline-mcp",
+    "api-performance-monitor",
+    "API_ContractValidator"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:hub": "npm run build -w @amani-patrick/mcp-hub",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "verify": "node scripts/verify-mcp-servers.mjs",
+    "verify:build": "node scripts/verify-build.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amani-patrick/mcp-hub.git"
+  }
+}

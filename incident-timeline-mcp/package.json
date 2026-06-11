@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "description": "MCP server for incident timeline analysis",
   "main": "dist/server.js",
+  "bin": {
+    "incident-timeline-mcp": "./dist/server.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "verify": "npm run build && node verify.mjs"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Amani Patrick",
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",
     "stream-chain": "^3.4.0",

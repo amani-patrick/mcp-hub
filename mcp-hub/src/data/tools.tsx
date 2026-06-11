@@ -1,4 +1,6 @@
-import { Ship, Container, Cloud, Shield, Activity, AlertTriangle, Clock, FileText, LucideIcon } from "lucide-react";
+import { Ship, Container, Cloud, Shield, Activity, AlertTriangle, Clock, LucideIcon } from "lucide-react";
+
+export type ToolMaturity = "stable" | "beta" | "docs-wip";
 
 export interface MCPTool {
   id: string;
@@ -6,10 +8,43 @@ export interface MCPTool {
   description: string;
   icon: LucideIcon;
   badge: string;
+  maturity: ToolMaturity;
+  repoPath: string;
+  entryPoint: string;
+  env?: Record<string, string>;
   features: string[];
   installation: string;
   configuration: string;
   usage: string;
+  githubPath: string;
+}
+
+const REPO_PLACEHOLDER = "/path/to/mcp-hub";
+
+export function getServerPath(tool: MCPTool): string {
+  return `${REPO_PLACEHOLDER}/${tool.repoPath}/${tool.entryPoint}`;
+}
+
+export function buildMcpConfig(tool: MCPTool, serverKey?: string): string {
+  const key = serverKey ?? tool.id.replace(/-mcp$/, "").replace(/-/g, "_");
+  const config: Record<string, unknown> = {
+    command: "node",
+    args: [getServerPath(tool)],
+  };
+  if (tool.env && Object.keys(tool.env).length > 0) {
+    config.env = tool.env;
+  }
+  return JSON.stringify({ mcpServers: { [key]: config } }, null, 2);
+}
+
+const maturityLabels: Record<ToolMaturity, string> = {
+  stable: "Stable",
+  beta: "Beta",
+  "docs-wip": "Docs WIP",
+};
+
+export function getMaturityLabel(maturity: ToolMaturity): string {
+  return maturityLabels[maturity];
 }
 
 export const mcpTools: MCPTool[] = [
@@ -19,7 +54,11 @@ export const mcpTools: MCPTool[] = [
     description:
       "A production-grade interface for safe, bounded Kubernetes operations. Enables LLMs to inspect clusters, manage workloads, and perform guarded deployments without unrestricted admin access.",
     icon: Ship,
-    badge: "🛡️ Production Ready",
+    badge: "Production Ready",
+    maturity: "beta",
+    repoPath: "kubernetes-mcp",
+    entryPoint: "build/index.js",
+    env: { KUBECONFIG: "/path/to/kubeconfig" },
     features: [
       "Namespace-scoped access control",
       "Guarded resource deletion",
@@ -27,21 +66,18 @@ export const mcpTools: MCPTool[] = [
       "Pod inspection & logs",
       "Manifest application with policy checks",
     ],
-    installation: "npx @modelcontextprotocol/server-kubernetes",
-    configuration: `
-{
-  "mcpServers": {
-    "kubernetes": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-kubernetes"],
-      "env": {
-        "KUBECONFIG": "/path/to/kubeconfig"
-      }
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w kubernetes-mcp`,
+    configuration: buildMcpConfig(
+      {
+        id: "kubernetes-mcp",
+        repoPath: "kubernetes-mcp",
+        entryPoint: "build/index.js",
+        env: { KUBECONFIG: "/path/to/kubeconfig" },
+      } as MCPTool,
+      "kubernetes"
+    ),
     usage: "Ask Claude to 'list pods in default namespace' or 'scale deployment my-app to 3 replicas'.",
+    githubPath: "kubernetes-mcp",
   },
   {
     id: "registry-mcp",
@@ -49,7 +85,15 @@ export const mcpTools: MCPTool[] = [
     description:
       "Secure governance for container registries. Allows agents to inspect images, verify policy compliance, and manage tags across Docker Hub and V2-compliant registries with strict safety guardrails.",
     icon: Container,
-    badge: "🔒 Secure",
+    badge: "Secure",
+    maturity: "beta",
+    repoPath: "registry-mcp",
+    entryPoint: "build/index.js",
+    env: {
+      REGISTRY_URL: "https://index.docker.io",
+      REGISTRY_USERNAME: "your-username",
+      REGISTRY_PASSWORD: "your-password",
+    },
     features: [
       "Image policy verification",
       "Cross-registry tag inspection",
@@ -57,23 +101,22 @@ export const mcpTools: MCPTool[] = [
       "Safe tag deletion with allowlists",
       "Vulnerability scanning integration",
     ],
-    installation: "npx @modelcontextprotocol/server-registry",
-    configuration: `
-{
-  "mcpServers": {
-    "registry": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-registry"],
-      "env": {
-        "REGISTRY_URL": "https://index.docker.io",
-        "REGISTRY_USERNAME": "your-username",
-        "REGISTRY_PASSWORD": "your-password"
-      }
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w registry-mcp`,
+    configuration: buildMcpConfig(
+      {
+        id: "registry-mcp",
+        repoPath: "registry-mcp",
+        entryPoint: "build/index.js",
+        env: {
+          REGISTRY_URL: "https://index.docker.io",
+          REGISTRY_USERNAME: "your-username",
+          REGISTRY_PASSWORD: "your-password",
+        },
+      } as MCPTool,
+      "registry"
+    ),
     usage: "Ask Claude to 'check if image alpine:latest is compliant' or 'list tags for nginx'.",
+    githubPath: "registry-mcp",
   },
   {
     id: "cloud-containers-mcp",
@@ -81,7 +124,11 @@ export const mcpTools: MCPTool[] = [
     description:
       "Abstracted management for serverless container platforms like AWS ECS. Provides a unified interface for deploying, scaling, and observing containerized services with built-in operational limits.",
     icon: Cloud,
-    badge: "☁️ Cloud Native",
+    badge: "Cloud Native",
+    maturity: "beta",
+    repoPath: "cloud-containers-mcp",
+    entryPoint: "build/index.js",
+    env: { AWS_REGION: "us-east-1", AWS_PROFILE: "default" },
     features: [
       "Multi-region environment discovery",
       "Safe service scaling with limits",
@@ -89,22 +136,18 @@ export const mcpTools: MCPTool[] = [
       "Zero-downtime restarts",
       "Guarded service deletion",
     ],
-    installation: "npx @modelcontextprotocol/server-cloud-containers",
-    configuration: `
-{
-  "mcpServers": {
-    "cloud-containers": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-cloud-containers"],
-      "env": {
-        "AWS_REGION": "us-east-1",
-        "AWS_PROFILE": "default"
-      }
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w cloud-containers-mcp`,
+    configuration: buildMcpConfig(
+      {
+        id: "cloud-containers-mcp",
+        repoPath: "cloud-containers-mcp",
+        entryPoint: "build/index.js",
+        env: { AWS_REGION: "us-east-1", AWS_PROFILE: "default" },
+      } as MCPTool,
+      "cloud-containers"
+    ),
     usage: "Ask Claude to 'scale service my-api to 5 instances' or 'show me the logs for the payment-service'.",
+    githubPath: "cloud-containers-mcp",
   },
   {
     id: "docker-mcp",
@@ -112,7 +155,11 @@ export const mcpTools: MCPTool[] = [
     description:
       "Safe, local Docker management for AI agents. Build images, run containers, and inspect resources with strict path allowlists and run profiles.",
     icon: Container,
-    badge: "🐳 Local Docker",
+    badge: "Local Docker",
+    maturity: "beta",
+    repoPath: "docker-mcp",
+    entryPoint: "build/index.js",
+    env: { ALLOWED_BUILD_PATHS: "/path/to/your/projects" },
     features: [
       "Safe image building from allowlisted paths",
       "Template-based container execution",
@@ -120,21 +167,18 @@ export const mcpTools: MCPTool[] = [
       "Container lifecycle management (Start/Stop/Restart)",
       "Explicit confirmation for destructive actions",
     ],
-    installation: "npx @modelcontextprotocol/server-docker",
-    configuration: `
-{
-  "mcpServers": {
-    "docker": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-docker"],
-      "env": {
-        "ALLOWED_BUILD_PATHS": "/path/to/projects"
-      }
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w docker-mcp`,
+    configuration: buildMcpConfig(
+      {
+        id: "docker-mcp",
+        repoPath: "docker-mcp",
+        entryPoint: "build/index.js",
+        env: { ALLOWED_BUILD_PATHS: "/path/to/your/projects" },
+      } as MCPTool,
+      "docker"
+    ),
     usage: "Ask Claude to 'list running containers' or 'build image from ./my-app'.",
+    githubPath: "docker-mcp",
   },
   {
     id: "api-contract-validator",
@@ -142,7 +186,10 @@ export const mcpTools: MCPTool[] = [
     description:
       "Enterprise-grade API validation tool. Detects breaking changes in OpenAPI specs and validates API responses against JSON schemas with enhanced security scanning.",
     icon: Shield,
-    badge: "✅ Quality",
+    badge: "Quality",
+    maturity: "stable",
+    repoPath: "API_ContractValidator",
+    entryPoint: "dist/index.js",
     features: [
       "OpenAPI breaking change detection",
       "JSON schema response validation",
@@ -150,18 +197,17 @@ export const mcpTools: MCPTool[] = [
       "Rate limiting & Authentication middleware",
       "Detailed validation reports",
     ],
-    installation: "npx @modelcontextprotocol/server-api-contract-validator",
-    configuration: `
-{
-  "mcpServers": {
-    "api-validator": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-api-contract-validator"]
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w mcp-api-contract-validator`,
+    configuration: buildMcpConfig(
+      {
+        id: "api-contract-validator",
+        repoPath: "API_ContractValidator",
+        entryPoint: "dist/index.js",
+      } as MCPTool,
+      "api-validator"
+    ),
     usage: "Ask Claude to 'validate this response against schema' or 'check for breaking changes between spec v1 and v2'.",
+    githubPath: "API_ContractValidator",
   },
   {
     id: "api-performance-monitor",
@@ -169,7 +215,11 @@ export const mcpTools: MCPTool[] = [
     description:
       "Real-time API performance monitoring with SLA tracking. Includes a live dashboard, WebSocket streaming, and integrations for Datadog, Prometheus, and Slack.",
     icon: Activity,
-    badge: "📈 Observability",
+    badge: "Observability",
+    maturity: "stable",
+    repoPath: "api-performance-monitor",
+    entryPoint: "dist/index.js",
+    env: { SLACK_WEBHOOK: "https://hooks.slack.com/..." },
     features: [
       "Real-time metric recording",
       "SLA compliance checking & alerting",
@@ -177,21 +227,18 @@ export const mcpTools: MCPTool[] = [
       "Historical analytics",
       "External integrations (Datadog, Slack, Prometheus)",
     ],
-    installation: "npx @modelcontextprotocol/server-api-performance-monitor",
-    configuration: `
-{
-  "mcpServers": {
-    "performance-monitor": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-api-performance-monitor"],
-      "env": {
-        "SLACK_WEBHOOK": "https://hooks.slack.com/..."
-      }
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w api-performance-monitor`,
+    configuration: buildMcpConfig(
+      {
+        id: "api-performance-monitor",
+        repoPath: "api-performance-monitor",
+        entryPoint: "dist/index.js",
+        env: { SLACK_WEBHOOK: "https://hooks.slack.com/..." },
+      } as MCPTool,
+      "performance-monitor"
+    ),
     usage: "Ask Claude to 'check SLA for /api/v1/users' or 'start the performance dashboard'.",
+    githubPath: "api-performance-monitor",
   },
   {
     id: "cloud-risk-scanner",
@@ -199,7 +246,10 @@ export const mcpTools: MCPTool[] = [
     description:
       "Static analysis tool for cloud infrastructure. Scans Terraform, Kubernetes YAML, and IAM policies to identify security misconfigurations and calculate risk scores.",
     icon: AlertTriangle,
-    badge: "⚠️ Security",
+    badge: "Security",
+    maturity: "stable",
+    repoPath: "cloud-risk-scanner",
+    entryPoint: "dist/src/server.js",
     features: [
       "Multi-format scanning (TF, YAML, JSON)",
       "IAM policy analysis",
@@ -207,18 +257,17 @@ export const mcpTools: MCPTool[] = [
       "Network configuration analysis",
       "Risk score calculation",
     ],
-    installation: "npx @modelcontextprotocol/server-cloud-risk-scanner",
-    configuration: `
-{
-  "mcpServers": {
-    "risk-scanner": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-cloud-risk-scanner"]
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w cloud-risk-scanner`,
+    configuration: buildMcpConfig(
+      {
+        id: "cloud-risk-scanner",
+        repoPath: "cloud-risk-scanner",
+        entryPoint: "dist/src/server.js",
+      } as MCPTool,
+      "risk-scanner"
+    ),
     usage: "Ask Claude to 'scan ./infrastructure for risks' or 'analyze this IAM policy'.",
+    githubPath: "cloud-risk-scanner",
   },
   {
     id: "incident-timeline-mcp",
@@ -226,7 +275,10 @@ export const mcpTools: MCPTool[] = [
     description:
       "Forensic analysis tool for incident response. Ingests raw logs, correlates events using graph algorithms, and builds a structured timeline of what happened.",
     icon: Clock,
-    badge: "🔍 Forensics",
+    badge: "Forensics",
+    maturity: "stable",
+    repoPath: "incident-timeline-mcp",
+    entryPoint: "dist/server.js",
     features: [
       "Log stream processing",
       "Graph-based event correlation",
@@ -234,17 +286,16 @@ export const mcpTools: MCPTool[] = [
       "Rule-based anomaly detection",
       "Incident summary generation",
     ],
-    installation: "npx @modelcontextprotocol/server-incident-timeline",
-    configuration: `
-{
-  "mcpServers": {
-    "incident-timeline": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-incident-timeline"]
-    }
-  }
-}
-    `,
+    installation: `git clone + npm run build -w incident-timeline-mcp`,
+    configuration: buildMcpConfig(
+      {
+        id: "incident-timeline-mcp",
+        repoPath: "incident-timeline-mcp",
+        entryPoint: "dist/server.js",
+      } as MCPTool,
+      "incident-timeline"
+    ),
     usage: "Ask Claude to 'build a timeline from ./app.log' or 'summarize the incident'.",
+    githubPath: "incident-timeline-mcp",
   },
 ];

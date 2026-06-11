@@ -1,5 +1,5 @@
-import { validateResponse } from '../src/tools/validate.js';
-import { parseSpec } from '../src/openapi.js';
+import { validateResponse } from '../src/tools/validate';
+import { parseSpec } from '../src/openapi';
 
 describe('Response Validation', () => {
   const userSchema = {

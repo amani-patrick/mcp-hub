@@ -1,6 +1,10 @@
 *.env
 node_modules/
 dist/
+build/
 .env.production
 *.cjs
-*.js
+
+# Allow verification scripts
+!**/verify.mjs
+!scripts/**/*.mjs

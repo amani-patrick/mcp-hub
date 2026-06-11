@@ -1,34 +1,53 @@
-import { mcpTools } from "@/data/tools";
+import { mcpTools, getMaturityLabel } from "@/data/tools";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const maturityStyles = {
+  stable: "bg-green-500/10 text-green-700 dark:text-green-400",
+  beta: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  "docs-wip": "bg-muted text-muted-foreground",
+};
 
 const Overview = () => {
-    return (
-        <div className="space-y-12">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-            >
-                <h1 className="text-4xl font-bold tracking-tight mb-4">Overview</h1>
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
-                    A focused collection of production-ready Model Context Protocol (MCP) servers designed for modern engineering teams.
-                </p>
-            </motion.div>
+  const stableCount = mcpTools.filter((t) => t.maturity === "stable").length;
+
+  return (
+    <div className="space-y-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Overview</h1>
+        <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
+          A focused collection of production-ready Model Context Protocol (MCP) servers designed for modern engineering teams.
+        </p>
+        <div className="mt-6">
+          <Button asChild>
+            <Link to="/docs/getting-started">
+              <Rocket className="w-4 h-4 mr-2" />
+              Get started in 15 minutes
+            </Link>
+          </Button>
+        </div>
+      </motion.div>
 
             <div className="grid gap-6 md:grid-cols-3">
                 <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">
                     <div className="text-3xl font-bold mb-2">{mcpTools.length}</div>
-                    <div className="text-sm text-muted-foreground font-medium">Production Tools</div>
+                    <div className="text-sm text-muted-foreground font-medium">MCP Tools</div>
                 </div>
                 <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">
-                    <div className="text-3xl font-bold mb-2">100%</div>
-                    <div className="text-sm text-muted-foreground font-medium">Open Source</div>
+                    <div className="text-3xl font-bold mb-2">{stableCount}</div>
+                    <div className="text-sm text-muted-foreground font-medium">Stable tools</div>
                 </div>
                 <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">
-                    <div className="text-3xl font-bold mb-2">0</div>
-                    <div className="text-sm text-muted-foreground font-medium">External APIs</div>
+                    <div className="text-3xl font-bold mb-2">MIT</div>
+                    <div className="text-sm text-muted-foreground font-medium">Open source license</div>
                 </div>
             </div>
 
@@ -50,6 +69,9 @@ const Overview = () => {
                             <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
                                 {tool.title}
                             </h3>
+                            <Badge variant="secondary" className={cn("mb-2 text-xs", maturityStyles[tool.maturity])}>
+                                {getMaturityLabel(tool.maturity)}
+                            </Badge>
                             <p className="text-sm text-muted-foreground line-clamp-3">
                                 {tool.description}
                             </p>

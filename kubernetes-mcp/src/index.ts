@@ -11,6 +11,7 @@ import { checkK8sConnection } from './k8s.js';
 import { discoveryTools, handleDiscoveryTool } from './tools/discovery.js';
 import { inspectionTools, handleInspectionTool } from './tools/inspection.js';
 import { safeOperationsTools, handleSafeOperationsTool } from './tools/safeOperations.js';
+import { advancedTools, handleAdvancedTool } from './tools/advanced.js';
 
 
 class K8sServer {
@@ -46,7 +47,7 @@ class K8sServer {
                     ...discoveryTools,
                     ...inspectionTools,
                     ...safeOperationsTools,
-
+                    ...advancedTools,
                 ],
             };
         });
@@ -64,7 +65,9 @@ class K8sServer {
                 if (safeOperationsTools.some(t => t.name === name)) {
                     return await handleSafeOperationsTool(name, args);
                 }
-
+                if (advancedTools.some(t => t.name === name)) {
+                    return await handleAdvancedTool(name, args);
+                }
 
                 throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
             } catch (error: any) {

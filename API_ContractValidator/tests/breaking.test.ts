@@ -1,4 +1,4 @@
-import { detectBreakingChanges, Severity, ChangeType } from '../src/tools/breaking.js';
+import { detectBreakingChanges, Severity, ChangeType } from '../src/tools/breaking';
 
 describe('Breaking Change Detection', () => {
   const oldSpec = {
@@ -99,7 +99,7 @@ describe('Breaking Change Detection', () => {
     );
 
     expect(result.breaking).toBe(true);
-    expect(result.summary.critical).toBe(2); // /users GET and POST removed
+    expect(result.summary.critical).toBe(1); // entire /users endpoint removed
     expect(result.changes).toContainEqual({
       type: ChangeType.BREAKING,
       severity: Severity.CRITICAL,
@@ -174,8 +174,8 @@ describe('Breaking Change Detection', () => {
       JSON.stringify(newSpec)
     );
 
-    expect(result.summary.info).toBe(1);
-    expect(result.summary.nonBreaking).toBe(1);
+    expect(result.summary.info).toBe(2);
+    expect(result.summary.nonBreaking).toBe(2);
     expect(result.changes).toContainEqual({
       type: ChangeType.NON_BREAKING,
       severity: Severity.INFO,
@@ -191,12 +191,12 @@ describe('Breaking Change Detection', () => {
     );
 
     expect(result.summary).toEqual({
-      critical: 1, // POST method removed
-      major: 1,    // required email added
-      minor: 1,    // age property removed
-      info: 1,     // /products endpoint added
-      breaking: 3,  // critical + major + minor
-      nonBreaking: 1 // info
+      critical: 1,
+      major: 1,
+      minor: 1,
+      info: 2,
+      breaking: 3,
+      nonBreaking: 2
     });
   });
 

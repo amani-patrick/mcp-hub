@@ -2,7 +2,7 @@ import { parseSpec } from "../openapi.js";
 
 export enum Severity {
   CRITICAL = 'critical',
-  MAJOR = 'major', 
+  MAJOR = 'major',
   MINOR = 'minor',
   INFO = 'info'
 }
@@ -33,6 +33,10 @@ interface ChangeResult {
   };
 }
 
+function normalizeMethod(method: string): string {
+  return method.toUpperCase();
+}
+
 export function detectBreakingChanges(
   oldRaw: string,
   newRaw: string
@@ -45,7 +49,6 @@ export function detectBreakingChanges(
   const oldPaths = oldSpec.paths || {};
   const newPaths = newSpec.paths || {};
 
-  // Detect breaking changes
   for (const path in oldPaths) {
     if (!newPaths[path]) {
       changes.push({
@@ -62,9 +65,9 @@ export function detectBreakingChanges(
         changes.push({
           type: ChangeType.BREAKING,
           severity: Severity.CRITICAL,
-          message: `Method removed: ${method.toUpperCase()} ${path}`,
+          message: `Method removed: ${normalizeMethod(method)} ${path}`,
           path,
-          method
+          method: normalizeMethod(method)
         });
         continue;
       }
@@ -77,9 +80,9 @@ export function detectBreakingChanges(
           changes.push({
             type: ChangeType.BREAKING,
             severity: Severity.MAJOR,
-            message: `Response status removed: ${method.toUpperCase()} ${path} ${status}`,
+            message: `Response status removed: ${normalizeMethod(method)} ${path} ${status}`,
             path,
-            method
+            method: normalizeMethod(method)
           });
           continue;
         }
@@ -87,16 +90,15 @@ export function detectBreakingChanges(
         compareSchemas(
           oldResponses[status]?.content?.["application/json"]?.schema,
           newResponses[status]?.content?.["application/json"]?.schema,
-          `${method.toUpperCase()} ${path} ${status}`,
+          `${normalizeMethod(method)} ${path} ${status}`,
           changes,
           path,
-          method
+          normalizeMethod(method)
         );
       }
     }
   }
 
-  // Detect non-breaking changes (additions)
   for (const path in newPaths) {
     if (!oldPaths[path]) {
       changes.push({
@@ -113,9 +115,9 @@ export function detectBreakingChanges(
         changes.push({
           type: ChangeType.NON_BREAKING,
           severity: Severity.INFO,
-          message: `New method added: ${method.toUpperCase()} ${path}`,
+          message: `New method added: ${normalizeMethod(method)} ${path}`,
           path,
-          method
+          method: normalizeMethod(method)
         });
         continue;
       }
@@ -128,16 +130,15 @@ export function detectBreakingChanges(
           changes.push({
             type: ChangeType.NON_BREAKING,
             severity: Severity.MINOR,
-            message: `New response status added: ${method.toUpperCase()} ${path} ${status}`,
+            message: `New response status added: ${normalizeMethod(method)} ${path} ${status}`,
             path,
-            method
+            method: normalizeMethod(method)
           });
         }
       }
     }
   }
 
-  // Generate summary
   const summary = {
     critical: changes.filter(c => c.severity === Severity.CRITICAL).length,
     major: changes.filter(c => c.severity === Severity.MAJOR).length,
@@ -163,7 +164,7 @@ function compareSchemas(
   method?: string
 ): void {
   if (!oldSchema && !newSchema) return;
-  
+
   if (!oldSchema && newSchema) {
     changes.push({
       type: ChangeType.NON_BREAKING,
@@ -174,7 +175,7 @@ function compareSchemas(
     });
     return;
   }
-  
+
   if (oldSchema && !newSchema) {
     changes.push({
       type: ChangeType.BREAKING,
@@ -186,7 +187,6 @@ function compareSchemas(
     return;
   }
 
-  // Check for required property changes
   if (oldSchema.required && newSchema.required) {
     const removedRequired = oldSchema.required.filter(
       (req: string) => !newSchema.required.includes(req)
@@ -215,7 +215,6 @@ function compareSchemas(
     }
   }
 
-  // Check for property changes
   if (oldSchema.properties && newSchema.properties) {
     for (const propName in oldSchema.properties) {
       if (!newSchema.properties[propName]) {
@@ -242,7 +241,6 @@ function compareSchemas(
     }
   }
 
-  // Check for type changes
   if (oldSchema.type !== newSchema.type) {
     changes.push({
       type: ChangeType.BREAKING,

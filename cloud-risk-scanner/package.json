@@ -1,17 +1,20 @@
 {
   "name": "cloud-risk-scanner",
   "version": "1.0.0",
-  "description": "Cloud Misconfig Risk Scanner",
+  "description": "Cloud Misconfig Risk Scanner MCP server",
   "main": "dist/src/server.js",
+  "bin": {
+    "cloud-risk-scanner": "./dist/src/server.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/server.js",
     "dev": "ts-node src/server.ts",
-    "verify": "npm run build && node dist/verify-script.js"
+    "verify": "npm run build && node verify.mjs"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Amani Patrick",
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",
     "hcl2-parser": "^1.0.0",
