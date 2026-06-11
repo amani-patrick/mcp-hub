@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
+import { shouldBypassStdioAuth } from '../utils/transport.js';
+
 export interface AuthConfig {
   apiKey?: string;
   jwtSecret?: string;
@@ -75,6 +77,10 @@ export class MCPAuth {
 
   authenticate(toolCall: any, context?: any): boolean {
     if (!this.config.enableAuth) {
+      return true;
+    }
+
+    if (shouldBypassStdioAuth(this.config.enableAuth)) {
       return true;
     }
 

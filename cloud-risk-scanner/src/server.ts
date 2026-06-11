@@ -1,9 +1,9 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
 import { scanConfigPath } from "./tools/scanPath";
 import { generateReport } from "./utils/reporter";
+import { resolveAllowedPath } from "./utils/pathSandbox";
 
 const server = new Server(
     {
@@ -49,7 +49,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!args.path) {
             throw new Error("Path is required");
         }
-        const findings = await scanConfigPath(args.path);
+        const safePath = resolveAllowedPath(args.path, "ALLOWED_SCAN_PATHS", "cloud-risk-scanner");
+        const findings = await scanConfigPath(safePath);
 
         if (args.reportFormat === "md") {
             const report = generateReport(findings, "md");

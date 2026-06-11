@@ -1,4 +1,4 @@
-import { ECSClient, ListClustersCommand, ListServicesCommand, DescribeServicesCommand, UpdateServiceCommand, DescribeTaskDefinitionCommand } from '@aws-sdk/client-ecs';
+import { ECSClient, ListClustersCommand, ListServicesCommand, DescribeServicesCommand, UpdateServiceCommand, DescribeTaskDefinitionCommand, DeleteServiceCommand } from '@aws-sdk/client-ecs';
 import { CloudWatchLogsClient, FilterLogEventsCommand } from '@aws-sdk/client-cloudwatch-logs';
 import { CloudPlatformAdapter, CloudEnvironment, CloudService } from './CloudPlatformAdapter.js';
 
@@ -111,6 +111,14 @@ export class AwsEcsAdapter implements CloudPlatformAdapter {
             forceNewDeployment: true,
         });
         await this.ecsClient.send(command);
+    }
+
+    async deleteService(environmentId: string, serviceName: string): Promise<void> {
+        await this.ecsClient.send(new DeleteServiceCommand({
+            cluster: environmentId,
+            service: serviceName,
+            force: true,
+        }));
     }
 
     async getServiceLogs(environmentId: string, serviceName: string, tail: number = 100): Promise<string[]> {

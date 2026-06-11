@@ -1,4 +1,6 @@
+import crypto from 'crypto';
 import { AuthConfig } from '../config/auth.js';
+import { shouldBypassStdioAuth } from '../utils/transport.js';
 
 export interface AuthContext {
   authenticated: boolean;
@@ -15,11 +17,18 @@ export class AuthMiddleware {
   }
 
   async authenticate(headers: Record<string, string>): Promise<AuthContext> {
-    // If auth is disabled, allow all requests
     if (!this.config.enabled) {
       return {
         authenticated: true,
         clientId: this.generateClientId(headers)
+      };
+    }
+
+    if (shouldBypassStdioAuth(this.config.enabled)) {
+      return {
+        authenticated: true,
+        clientId: 'stdio-local',
+        userId: 'stdio-user'
       };
     }
 
@@ -38,8 +47,16 @@ export class AuthMiddleware {
   }
 
   private authenticateApiKey(headers: Record<string, string>): AuthContext {
+    if (!this.config.apiKey) {
+      return {
+        authenticated: false,
+        clientId: 'anonymous',
+        error: 'API key not configured (set MCP_API_KEY)'
+      };
+    }
+
     const authHeader = headers['authorization'] || headers['x-api-key'];
-    
+
     if (!authHeader) {
       return {
         authenticated: false,
@@ -48,8 +65,8 @@ export class AuthMiddleware {
       };
     }
 
-    const apiKey = authHeader.startsWith('Bearer ') 
-      ? authHeader.slice(7) 
+    const apiKey = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
       : authHeader;
 
     if (apiKey !== this.config.apiKey) {
@@ -68,9 +85,8 @@ export class AuthMiddleware {
   }
 
   private authenticateJwt(headers: Record<string, string>): AuthContext {
-    // Simple JWT validation (in production, use a proper JWT library)
     const authHeader = headers['authorization'];
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return {
         authenticated: false,
@@ -80,17 +96,51 @@ export class AuthMiddleware {
     }
 
     const token = authHeader.slice(7);
-    
+    const parts = token.split('.');
+
+    if (parts.length !== 3) {
+      return {
+        authenticated: false,
+        clientId: 'anonymous',
+        error: 'Invalid JWT token'
+      };
+    }
+
+    if (!this.config.jwtSecret) {
+      return {
+        authenticated: false,
+        clientId: 'anonymous',
+        error: 'JWT secret not configured (set MCP_JWT_SECRET)'
+      };
+    }
+
     try {
-      // This is a simplified validation - use proper JWT verification in production
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      
+      const expectedSignature = crypto
+        .createHmac('sha256', this.config.jwtSecret)
+        .update(`${parts[0]}.${parts[1]}`)
+        .digest('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+      if (parts[2] !== expectedSignature) {
+        return {
+          authenticated: false,
+          clientId: 'anonymous',
+          error: 'Invalid JWT signature'
+        };
+      }
+
+      const payload = JSON.parse(
+        Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()
+      );
+
       return {
         authenticated: true,
-        clientId: `jwt-${payload.sub || payload.user_id}`,
+        clientId: `jwt-${payload.sub || payload.user_id || 'user'}`,
         userId: payload.sub || payload.user_id
       };
-    } catch (error) {
+    } catch {
       return {
         authenticated: false,
         clientId: 'anonymous',
@@ -100,11 +150,9 @@ export class AuthMiddleware {
   }
 
   private generateClientId(headers: Record<string, string>): string {
-    // Generate a client ID from request headers for rate limiting
     const userAgent = headers['user-agent'] || 'unknown';
     const forwarded = headers['x-forwarded-for'] || headers['x-real-ip'] || 'localhost';
-    
-    // Simple hash for client identification
+
     return `client-${Buffer.from(`${forwarded}-${userAgent}`).toString('base64').slice(0, 16)}`;
   }
 }

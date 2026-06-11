@@ -51,14 +51,11 @@ export async function handleInspectionTool(name: string, args: any) {
             };
         }
         case 'get_tag_metadata': {
-            // For now, we fetch the manifest to get metadata as V2 API doesn't have a direct lightweight metadata endpoint for tags
-            const manifest = await registryAdapter.getManifest(args.namespace || '', args.repository, args.tag);
-            const metadata = {
-                tag: args.tag,
-                schemaVersion: manifest.schemaVersion,
-                layers: manifest.layers?.length,
-                architecture: manifest.architecture, // V1 compatibility
-            };
+            const metadata = await registryAdapter.getTagMetadata(
+                args.namespace || '',
+                args.repository,
+                args.tag
+            );
             return {
                 content: [{ type: 'text', text: JSON.stringify(metadata, null, 2) }],
             };

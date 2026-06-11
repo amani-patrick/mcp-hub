@@ -1,10 +1,10 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
 import { loadLogs } from "./tools/loadLogs";
 import { buildTimeline } from "./tools/buildTimeline";
 import { summarizeIncident } from "./tools/summarizeIncident";
+import { resolveAllowedPath } from "./utils/pathSandbox";
 
 const server = new Server(
     {
@@ -66,18 +66,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("filePath is required");
     }
 
+    const safePath = resolveAllowedPath(filePath, "ALLOWED_LOG_PATHS", "incident-timeline-mcp");
+
     switch (name) {
         case "load_logs":
             return {
-                content: [{ type: "text", text: JSON.stringify(loadLogs(filePath), null, 2) }]
+                content: [{ type: "text", text: JSON.stringify(loadLogs(safePath), null, 2) }]
             };
         case "build_timeline":
             return {
-                content: [{ type: "text", text: JSON.stringify(await buildTimeline(filePath), null, 2) }]
+                content: [{ type: "text", text: JSON.stringify(await buildTimeline(safePath), null, 2) }]
             };
         case "summarize_incident":
             return {
-                content: [{ type: "text", text: await summarizeIncident(filePath) }]
+                content: [{ type: "text", text: await summarizeIncident(safePath) }]
             };
         default:
             throw new Error(`Tool ${name} not found`);

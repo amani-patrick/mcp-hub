@@ -1,4 +1,5 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { isClusterAllowed, cloudAdapter } from '../config.js';
 
 export const guardedTools: Tool[] = [
     {
@@ -16,8 +17,6 @@ export const guardedTools: Tool[] = [
     },
 ];
 
-import { isClusterAllowed } from '../config.js';
-
 export async function handleGuardedTool(name: string, args: any) {
     switch (name) {
         case 'delete_service': {
@@ -27,10 +26,13 @@ export async function handleGuardedTool(name: string, args: any) {
             if (args.confirm !== true) {
                 throw new Error('Operation cancelled: confirmation required (set confirm: true)');
             }
-            // In a real implementation, we would call cloudAdapter.deleteService here.
-            // For safety in this demo, we just return a message.
+
+            await cloudAdapter.deleteService(args.environmentId, args.serviceName);
             return {
-                content: [{ type: 'text', text: `Service ${args.serviceName} deletion simulated (not fully implemented for safety).` }],
+                content: [{
+                    type: 'text',
+                    text: `Service ${args.serviceName} deleted from ${args.environmentId}`,
+                }],
             };
         }
         default:

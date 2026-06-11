@@ -3,8 +3,9 @@ import { CustomRuleEngine } from "../enhanced/validation/custom-rules.js";
 import { SecurityScanner } from "../enhanced/validation/security-scanner.js";
 import { PerformanceAnalyzer } from "../enhanced/validation/performance-analyzer.js";
 import { VisualDiffGenerator } from "../enhanced/diff/visual-diff.js";
+import { detectBreakingChanges } from "./breaking.js";
+import { parseSpec } from "../openapi.js";
 
-// Enhanced validation schemas
 const EnhancedValidationRequestSchema = z.object({
   spec: z.any(),
   companyStandards: z.object({
@@ -31,60 +32,67 @@ const EnhancedDiffRequestSchema = z.object({
   includeMigrationSuggestions: z.boolean().default(true)
 });
 
-// Initialize enhanced services
 const securityScanner = new SecurityScanner();
 const performanceAnalyzer = new PerformanceAnalyzer();
 const visualDiffGenerator = new VisualDiffGenerator();
+
+function normalizeSpec(spec: unknown): any {
+  if (typeof spec === 'string') {
+    return parseSpec(spec);
+  }
+  return spec;
+}
+
+function specToString(spec: unknown): string {
+  return typeof spec === 'string' ? spec : JSON.stringify(spec);
+}
 
 export const enhancedValidateResponse = {
   name: "enhanced_validate_response",
   description: "Enhanced API response validation with custom rules, security scanning, and performance analysis",
   inputSchema: EnhancedValidationRequestSchema,
   handler: async (input: z.infer<typeof EnhancedValidationRequestSchema>) => {
-    const { spec, companyStandards, teamId, includeSecurity, includePerformance } = input;
-    
-    const results: any = {
+    const { spec, companyStandards, includeSecurity, includePerformance } = input;
+
+    const results: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
-      basicValidation: true,
-      enhancedFeatures: []
+      enhancedFeatures: [] as string[],
     };
 
     try {
-      // Custom rule engine validation
+      const parsedSpec = normalizeSpec(spec);
+
       if (companyStandards) {
         const ruleEngine = new CustomRuleEngine(companyStandards);
-        const customValidation = ruleEngine.validate(spec);
-        results.customRules = customValidation;
-        results.enhancedFeatures.push('custom-rules');
+        results.customRules = ruleEngine.validate(parsedSpec);
+        (results.enhancedFeatures as string[]).push('custom-rules');
       }
 
-      // Security scanning
       if (includeSecurity) {
-        // Use available security scanner methods
-        const securityResults = {
-          vulnerabilities: [],
-          recommendations: ['Enable HTTPS', 'Add authentication headers']
+        const vulnerabilities = securityScanner.scan(parsedSpec);
+        results.security = {
+          vulnerabilities,
+          recommendations: [...new Set(vulnerabilities.map(v => v.recommendation))],
         };
-        results.security = securityResults;
-        results.enhancedFeatures.push('security-scanning');
+        (results.enhancedFeatures as string[]).push('security-scanning');
       }
 
-      // Performance analysis
       if (includePerformance) {
-        // Use available performance analyzer methods
-        const performanceResults = {
-          issues: [],
-          recommendations: ['Optimize response size', 'Add caching headers']
-        };
-        results.performance = performanceResults;
-        results.enhancedFeatures.push('performance-analysis');
+        results.performance = performanceAnalyzer.analyze(parsedSpec);
+        (results.enhancedFeatures as string[]).push('performance-analysis');
       }
+
+      const features = results.enhancedFeatures as string[];
 
       return {
         content: [
           {
             type: "text",
-            text: `Enhanced validation completed. Features: ${results.enhancedFeatures.join(', ')}`
+            text: JSON.stringify(results, null, 2),
+          },
+          {
+            type: "text",
+            text: `Enhanced validation completed. Features: ${features.join(', ')}`,
           }
         ],
         isError: false,
@@ -110,68 +118,50 @@ export const enhancedBreakingChanges = {
   inputSchema: EnhancedDiffRequestSchema,
   handler: async (input: z.infer<typeof EnhancedDiffRequestSchema>) => {
     const { oldSpec, newSpec, includeVisualDiff, includeClientImpact, includeMigrationSuggestions } = input;
-    
+
     try {
-      const results: any = {
+      const basicResult = detectBreakingChanges(specToString(oldSpec), specToString(newSpec));
+      const oldObj = normalizeSpec(oldSpec);
+      const newObj = normalizeSpec(newSpec);
+      const diff = visualDiffGenerator.generateSideBySideDiff(oldObj, newObj);
+
+      const results: Record<string, unknown> = {
         timestamp: new Date().toISOString(),
-        breakingChanges: [],
-        enhancedFeatures: []
+        breaking: basicResult.breaking,
+        breakingChanges: basicResult.changes,
+        summary: basicResult.summary,
+        enhancedFeatures: ['basic-diff'],
       };
 
-      // Basic breaking change detection
-      const basicChanges = {
-        changes: [
-          {
-            type: 'breaking',
-            severity: 'major',
-            message: 'Mock breaking change detected',
-            path: '/api/test'
-          }
-        ]
-      };
-      results.breakingChanges = basicChanges.changes || [];
-      results.enhancedFeatures.push('basic-diff');
-
-      // Visual diff generation
       if (includeVisualDiff) {
-        const visualDiff = {
-          html: '<div>Mock visual diff</div>',
-          summary: 'Changes detected between versions'
+        results.visualDiff = {
+          summary: diff.summary,
+          changes: diff.changes,
         };
-        results.visualDiff = visualDiff;
-        results.enhancedFeatures.push('visual-diff');
+        (results.enhancedFeatures as string[]).push('visual-diff');
       }
 
-      // Client impact analysis
       if (includeClientImpact) {
-        const clientImpact = {
-          affectedClients: ['web-client', 'mobile-app'],
-          impactLevel: 'medium',
-          requiredActions: ['Update API calls', 'Test integrations']
-        };
-        results.clientImpact = clientImpact;
-        results.enhancedFeatures.push('client-impact');
+        results.clientImpact = diff.clientImpacts;
+        (results.enhancedFeatures as string[]).push('client-impact');
       }
 
-      // Migration suggestions
       if (includeMigrationSuggestions) {
-        const migrationSuggestions = {
-          steps: [
-            'Update API endpoints',
-            'Modify request/response handling',
-            'Run integration tests'
-          ],
-          estimatedTime: '2-4 hours'
-        };
-        results.migrationSuggestions = migrationSuggestions;
-        results.enhancedFeatures.push('migration-suggestions');
+        results.migrationSuggestions = diff.migrationSuggestions;
+        (results.enhancedFeatures as string[]).push('migration-suggestions');
       }
+
+      const features = results.enhancedFeatures as string[];
 
       return {
         content: [
           {
             type: "text",
-            text: `Enhanced breaking change analysis completed. Found ${results.breakingChanges.length} changes. Features: ${results.enhancedFeatures.join(', ')}`
+            text: JSON.stringify(results, null, 2),
+          },
+          {
+            type: "text",
+            text: `Enhanced breaking change analysis completed. Found ${basicResult.changes.length} changes (${basicResult.summary.breaking} breaking). Features: ${features.join(', ')}`,
           }
         ],
         isError: false,

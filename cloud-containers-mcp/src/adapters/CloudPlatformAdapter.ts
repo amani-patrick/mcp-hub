@@ -43,6 +43,11 @@ export interface CloudPlatformAdapter {
     restartService(environmentId: string, serviceName: string): Promise<void>;
 
     /**
+     * Delete a service.
+     */
+    deleteService(environmentId: string, serviceName: string): Promise<void>;
+
+    /**
      * Get logs for a service.
      */
     getServiceLogs(environmentId: string, serviceName: string, tail?: number): Promise<string[]>;
